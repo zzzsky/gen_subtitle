@@ -1,0 +1,67 @@
+<Window x:Class="GenSubtitle.App.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings" Height="560" Width="600" WindowStartupLocation="CenterOwner">
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <Border Background="{StaticResource VsHeaderBrush}" BorderBrush="{StaticResource VsBorderBrush}" BorderThickness="1" Padding="10" CornerRadius="6">
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Text="Settings" FontSize="16" FontWeight="SemiBold" />
+        <TextBlock Text="  App configuration" Foreground="{StaticResource VsMutedTextBrush}" VerticalAlignment="Center" />
+      </StackPanel>
+    </Border>
+
+    <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,10,0,0">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="170" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Text="Whisper Model" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource VsMutedTextBrush}" />
+        <ComboBox x:Name="WhisperModelBox" Grid.Row="0" Grid.Column="1" Margin="8,4" IsEditable="False" />
+
+        <TextBlock Text="Use GPU" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource VsMutedTextBrush}" />
+        <CheckBox x:Name="UseGpuBox" Grid.Row="1" Grid.Column="1" Margin="8,4" />
+
+        <TextBlock Text="Qwen API Key" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource VsMutedTextBrush}" />
+        <TextBox x:Name="QwenKeyBox" Grid.Row="2" Grid.Column="1" Margin="8,4" />
+
+        <TextBlock Text="Qwen Model" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource VsMutedTextBrush}" />
+        <TextBox x:Name="QwenModelBox" Grid.Row="3" Grid.Column="1" Margin="8,4" />
+
+        <TextBlock Text="Auto Translate" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource VsMutedTextBrush}" />
+        <CheckBox x:Name="AutoTranslateBox" Grid.Row="4" Grid.Column="1" Margin="8,4" />
+
+        <TextBlock Text="Max Concurrency" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource VsMutedTextBrush}" />
+        <TextBox x:Name="MaxConcurrencyBox" Grid.Row="5" Grid.Column="1" Margin="8,4" />
+
+        <TextBlock Text="Enabled Languages" Grid.Row="6" Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource VsMutedTextBrush}" />
+        <TextBox x:Name="LanguagesBox" Grid.Row="6" Grid.Column="1" Margin="8,4" />
+
+        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+          <Button Width="90" Margin="0,0,8,0" Click="OnCancel">Cancel</Button>
+          <Button Width="90" Style="{StaticResource PrimaryButton}" Click="OnSave">Save</Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

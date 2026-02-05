@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GenSubtitle.Core\GenSubtitle.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ffmpeg\x64\ffmpeg.exe" Condition="Exists('ffmpeg\\x64\\ffmpeg.exe')" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="whisper\x64\**\*.*" Condition="Exists('whisper\\x64')" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="whisper\models\**\*.*" Condition="Exists('whisper\\models')" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
