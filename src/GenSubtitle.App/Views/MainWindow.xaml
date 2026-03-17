@@ -5,11 +5,12 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:GenSubtitle.App.Views"
         xmlns:cmd="clr-namespace:GenSubtitle.App"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="GenSubtitle" Height="820" Width="1280"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="False"
-        Background="{StaticResource VsBackgroundBrush}">
+        Background="{DynamicResource MaterialDesignPaper}">
   <shell:WindowChrome.WindowChrome>
     <shell:WindowChrome CaptionHeight="32" ResizeBorderThickness="6" CornerRadius="0" GlassFrameThickness="0" />
   </shell:WindowChrome.WindowChrome>
@@ -27,7 +28,7 @@
       <RowDefinition Height="180" />
     </Grid.RowDefinitions>
 
-    <Border Grid.Row="0" Background="{StaticResource VsHeaderBrush}" BorderBrush="{StaticResource VsBorderBrush}" BorderThickness="0,0,0,1" Padding="8,0" MouseLeftButtonDown="OnTitleBarMouseDown">
+    <Border Grid.Row="0" Background="{DynamicResource PrimaryHueLightBrush}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,0,1" Padding="8,0" MouseLeftButtonDown="OnTitleBarMouseDown">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" />
@@ -65,31 +66,31 @@
               <MenuItem Header="Open Log Folder" Click="OnOpenLogFolder" />
             </MenuItem>
           </Menu>
-          <TextBlock Grid.Column="2" Text="{Binding SelectedVideoPath}" TextTrimming="CharacterEllipsis" Foreground="{StaticResource VsMutedTextBrush}" Width="220" Margin="12,0,0,0" VerticalAlignment="Center" />
+          <TextBlock Grid.Column="2" Text="{Binding SelectedVideoPath}" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource MaterialDesignBodyLight}" Width="220" Margin="12,0,0,0" VerticalAlignment="Center" />
         </Grid>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-          <Button Style="{StaticResource ToolbarButton}" Click="OnImportFiles" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+          <Button Style="{StaticResource MaterialDesignRaisedButton}" Click="OnImportFiles" shell:WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,6,0">
             <StackPanel Orientation="Horizontal">
-              <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE118;" />
+              <materialDesign:PackIcon Kind="FilePlus" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
               <TextBlock Text="Import" />
             </StackPanel>
           </Button>
-          <Button Style="{StaticResource ToolbarButton}" Click="OnOpenSettings" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+          <Button Style="{StaticResource MaterialDesignRaisedButton}" Click="OnOpenSettings" shell:WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,6,0">
             <StackPanel Orientation="Horizontal">
-              <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE713;" />
+              <materialDesign:PackIcon Kind="Cog" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
               <TextBlock Text="Settings" />
             </StackPanel>
           </Button>
 
-          <Button Style="{StaticResource WindowButton}" Click="OnMinimize" shell:WindowChrome.IsHitTestVisibleInChrome="True">
-            <TextBlock Style="{StaticResource WindowGlyph}" Text="&#xE921;" />
+          <Button Style="{StaticResource MaterialDesignFlatButton}" Click="OnMinimize" shell:WindowChrome.IsHitTestVisibleInChrome="True" Width="40" Height="30" Padding="0">
+            <materialDesign:PackIcon Kind="WindowMinimize" Width="16" Height="16" />
           </Button>
-          <Button Style="{StaticResource WindowButton}" Click="OnMaximize" shell:WindowChrome.IsHitTestVisibleInChrome="True">
-            <TextBlock Style="{StaticResource WindowGlyph}" Text="&#xE922;" />
+          <Button Style="{StaticResource MaterialDesignFlatButton}" Click="OnMaximize" shell:WindowChrome.IsHitTestVisibleInChrome="True" Width="40" Height="30" Padding="0">
+            <materialDesign:PackIcon Kind="WindowMaximize" Width="16" Height="16" />
           </Button>
-          <Button Style="{StaticResource WindowButton}" Click="OnClose" shell:WindowChrome.IsHitTestVisibleInChrome="True">
-            <TextBlock Style="{StaticResource WindowGlyph}" Text="&#xE8BB;" />
+          <Button Style="{StaticResource MaterialDesignFlatButton}" Click="OnClose" shell:WindowChrome.IsHitTestVisibleInChrome="True" Width="40" Height="30" Padding="0">
+            <materialDesign:PackIcon Kind="Close" Width="16" Height="16" />
           </Button>
         </StackPanel>
       </Grid>
@@ -102,17 +103,17 @@
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
 
-      <Border x:Name="QueuePanel" Grid.Column="0" Style="{StaticResource Card}" Padding="10">
+      <materialDesign:Card x:Name="QueuePanel" Grid.Column="0" Padding="10" Margin="0,0,0,0">
         <Grid>
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
           </Grid.RowDefinitions>
-          <TextBlock Text="Task Queue" Style="{StaticResource SectionHeader}" />
-          <ListBox Grid.Row="1" ItemsSource="{Binding Queue.Tasks}" SelectedItem="{Binding SelectedTask}" Margin="0,6,0,0" SelectionChanged="OnTaskSelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+          <TextBlock Text="Task Queue" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" />
+          <ListBox Grid.Row="1" Style="{StaticResource MaterialDesignListBox}" ItemsSource="{Binding Queue.Tasks}" SelectedItem="{Binding SelectedTask}" Margin="0,6,0,0" SelectionChanged="OnTaskSelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListBox.ItemTemplate>
               <DataTemplate>
-                <Border BorderBrush="{StaticResource VsBorderBrush}" BorderThickness="0,0,0,1" Padding="8">
+                <materialDesign:Card Padding="8" Margin="0,4,0,4">
                   <Grid>
                     <Grid.RowDefinitions>
                       <RowDefinition Height="Auto" />
@@ -127,7 +128,7 @@
                         <ToolTip Content="{Binding FileName}" />
                       </TextBlock.ToolTip>
                     </TextBlock>
-                    <TextBlock Grid.Row="1" Text="{Binding StatusText}" Foreground="{StaticResource VsMutedTextBrush}" Margin="0,2,0,2">
+                    <TextBlock Grid.Row="1" Text="{Binding StatusText}" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,2,0,2">
                       <TextBlock.Style>
                         <Style TargetType="TextBlock">
                           <Setter Property="Visibility" Value="Collapsed" />
@@ -171,11 +172,11 @@
                           </Style>
                         </ProgressBar.Style>
                       </ProgressBar>
-                      <TextBlock Text="{Binding ProgressText}" Foreground="{StaticResource VsMutedTextBrush}" Margin="0,0,8,0" />
-                      <TextBlock Text="{Binding TranslationEtaText}" Foreground="{StaticResource VsMutedTextBrush}" />
+                      <TextBlock Text="{Binding ProgressText}" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,8,0" />
+                      <TextBlock Text="{Binding TranslationEtaText}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                     </StackPanel>
                   </Grid>
-                </Border>
+                </materialDesign:Card>
               </DataTemplate>
             </ListBox.ItemTemplate>
             <ListBox.ItemContainerStyle>
@@ -197,7 +198,7 @@
             </ListBox.ItemContainerStyle>
           </ListBox>
         </Grid>
-      </Border>
+      </materialDesign:Card>
 
       <Grid Grid.Column="2" DataContext="{Binding SelectedTask}">
         <Grid.RowDefinitions>
@@ -206,15 +207,15 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,8" VerticalAlignment="Center">
-          <TextBlock Text="Detected Language" Style="{StaticResource SectionHeader}" Margin="0,0,8,0" />
+          <TextBlock Text="Detected Language" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="0,0,8,0" />
           <TextBlock Text="{Binding DetectedLanguage}" FontWeight="SemiBold" />
         </StackPanel>
 
         <Grid Grid.Row="1">
           <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="PreviewColumn" Width="2*" />
+            <ColumnDefinition x:Name="PreviewColumn" Width="2.2*" />
             <ColumnDefinition x:Name="PreviewGapColumn" Width="12" />
-            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="2.8*" />
           </Grid.ColumnDefinitions>
 
           <Grid x:Name="PreviewPanel" Grid.Column="0">
@@ -225,28 +226,28 @@
               <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Preview" Style="{StaticResource SectionHeader}" />
-            <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,10">
+            <TextBlock Text="Preview" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" />
+            <materialDesign:Card Grid.Row="1" Margin="0,0,0,10">
               <Border Background="#0E0E0E" CornerRadius="4">
                 <MediaElement x:Name="Player" LoadedBehavior="Manual" UnloadedBehavior="Manual" ScrubbingEnabled="True" />
               </Border>
-            </Border>
+            </materialDesign:Card>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
-              <Button Content="Play" Width="80" Margin="0,0,8,0" Click="OnPlay" />
-              <Button Content="Pause" Width="80" Margin="0,0,8,0" Click="OnPause" />
-              <Button Content="Align Start" Width="100" Margin="0,0,8,0" Click="OnAlignStart" />
-              <Button Content="Align End" Width="100" Click="OnAlignEnd" />
+              <Button Content="Play" Style="{StaticResource MaterialDesignRaisedButton}" Width="80" Margin="0,0,8,0" Click="OnPlay" />
+              <Button Content="Pause" Style="{StaticResource MaterialDesignRaisedButton}" Width="80" Margin="0,0,8,0" Click="OnPause" />
+              <Button Content="Align Start" Style="{StaticResource MaterialDesignOutlinedButton}" Width="110" Margin="0,0,8,0" Click="OnAlignStart" />
+              <Button Content="Align End" Style="{StaticResource MaterialDesignOutlinedButton}" Width="110" Click="OnAlignEnd" />
             </StackPanel>
 
             <StackPanel Grid.Row="3" Orientation="Vertical">
-              <Slider x:Name="TimelineSlider" Minimum="0" Maximum="1" ValueChanged="OnTimelineChanged" PreviewMouseLeftButtonDown="OnSeekStart" PreviewMouseLeftButtonUp="OnSeekEnd" PreviewMouseMove="OnSeekMove" />
-              <TextBlock x:Name="TimeDisplay" Text="00:00 / 00:00" Margin="0,4,0,0" Foreground="{StaticResource VsMutedTextBrush}" />
+              <Slider x:Name="TimelineSlider" Style="{StaticResource MaterialDesignSlider}" Minimum="0" Maximum="1" ValueChanged="OnTimelineChanged" PreviewMouseLeftButtonDown="OnSeekStart" PreviewMouseLeftButtonUp="OnSeekEnd" PreviewMouseMove="OnSeekMove" />
+              <TextBlock x:Name="TimeDisplay" Text="00:00 / 00:00" Margin="0,4,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
             </StackPanel>
           </Grid>
 
-          <Border Grid.Column="2" Style="{StaticResource Card}">
-            <DataGrid ItemsSource="{Binding Segments}" SelectedItem="{Binding SelectedSegment}" AutoGenerateColumns="False" CanUserAddRows="False">
+          <materialDesign:Card Grid.Column="2">
+            <DataGrid Style="{StaticResource MaterialDesignDataGrid}" ItemsSource="{Binding Segments}" SelectedItem="{Binding SelectedSegment}" AutoGenerateColumns="False" CanUserAddRows="False" materialDesign:DataGridAssist.CellPadding="8">
               <DataGrid.Columns>
                 <DataGridTextColumn Header="#" Binding="{Binding Id}" Width="40" />
                 <DataGridTextColumn Header="Start" Binding="{Binding Start}" Width="90" />
@@ -255,31 +256,31 @@
                 <DataGridTextColumn Header="中文" Binding="{Binding ZhText}" Width="*" />
               </DataGrid.Columns>
             </DataGrid>
-          </Border>
+          </materialDesign:Card>
         </Grid>
       </Grid>
     </Grid>
 
-    <Border Grid.Row="2" Background="{StaticResource VsHeaderBrush}" BorderBrush="{StaticResource VsBorderBrush}" BorderThickness="1,1,1,0" Padding="8">
+    <Border Grid.Row="2" Background="{DynamicResource PrimaryHueLightBrush}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1,1,1,0" Padding="8">
       <DockPanel>
-        <TextBlock Text="{Binding Queue.QueueSummary}" DockPanel.Dock="Left" Foreground="{StaticResource VsMutedTextBrush}" />
-        <TextBlock Text="Auto-Translate:" Margin="16,0,6,0" DockPanel.Dock="Right" Foreground="{StaticResource VsMutedTextBrush}" />
+        <TextBlock Text="{Binding Queue.QueueSummary}" DockPanel.Dock="Left" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+        <TextBlock Text="Auto-Translate:" Margin="16,0,6,0" DockPanel.Dock="Right" Foreground="{DynamicResource MaterialDesignBodyLight}" />
         <TextBlock Text="{Binding Settings.AutoTranslateEnabled}" DockPanel.Dock="Right" />
       </DockPanel>
     </Border>
 
-    <Border Grid.Row="3" Background="{StaticResource VsSurfaceBrush}" BorderBrush="{StaticResource VsBorderBrush}" BorderThickness="1,1,1,0" Padding="8">
+    <materialDesign:Card Grid.Row="3" Padding="8" Margin="0">
       <Grid>
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" />
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0">
-          <TextBlock Text="Console" Style="{StaticResource SectionHeader}" DockPanel.Dock="Left" />
-          <Button Content="Clear" Style="{StaticResource SmallButton}" DockPanel.Dock="Right" Click="OnClearLog" />
+          <TextBlock Text="Console" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" DockPanel.Dock="Left" />
+          <Button Content="Clear" Style="{StaticResource MaterialDesignOutlinedButton}" DockPanel.Dock="Right" Click="OnClearLog" />
         </DockPanel>
-        <TextBox x:Name="LogBox" Grid.Row="1" Text="{Binding Queue.LogText}" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Background="{StaticResource VsPanelBrush}" BorderThickness="1" TextChanged="OnLogTextChanged" Loaded="OnLogLoaded" />
+        <TextBox x:Name="LogBox" Grid.Row="1" Style="{StaticResource MaterialDesignOutlinedTextBox}" Text="{Binding Queue.LogText}" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" TextChanged="OnLogTextChanged" Loaded="OnLogLoaded" />
       </Grid>
-    </Border>
+    </materialDesign:Card>
   </Grid>
 </Window>

@@ -1,6 +1,7 @@
 <Window x:Class="GenSubtitle.App.Views.ExportWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Export" Height="260" Width="360" WindowStartupLocation="CenterOwner">
   <Grid Margin="12">
     <Grid.RowDefinitions>
@@ -8,14 +9,14 @@
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <Border Background="{StaticResource VsHeaderBrush}" BorderBrush="{StaticResource VsBorderBrush}" BorderThickness="1" Padding="10" CornerRadius="6">
-      <StackPanel Orientation="Horizontal">
-        <TextBlock Text="Export" FontSize="16" FontWeight="SemiBold" />
-        <TextBlock Text="  Video options" Foreground="{StaticResource VsMutedTextBrush}" VerticalAlignment="Center" />
-      </StackPanel>
-    </Border>
+    <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" Margin="0,0,0,12" materialDesign:ElevationAssist.Elevation="Dp4">
+      <DockPanel>
+        <TextBlock Text="Export" Style="{StaticResource MaterialDesignHeadline6TextBlock}" />
+        <TextBlock Text="  Video options" Style="{StaticResource MaterialDesignBody1TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+      </DockPanel>
+    </materialDesign:ColorZone>
 
-    <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,10,0,0">
+    <materialDesign:Card Grid.Row="1" Margin="0,0,0,0">
       <Grid>
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" />
@@ -25,19 +26,19 @@
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <RadioButton x:Name="SoftMuxRadio" Content="Soft Mux" GroupName="ExportMode" Grid.Row="0" Margin="0,0,0,8" />
-        <RadioButton x:Name="BurnInRadio" Content="Burn-in (Hard Subs)" GroupName="ExportMode" Grid.Row="1" Margin="0,0,0,8" />
+        <RadioButton x:Name="SoftMuxRadio" Content="Soft Mux" GroupName="ExportMode" Grid.Row="0" Margin="0,0,0,8" Style="{StaticResource MaterialDesignRadioButton}" />
+        <RadioButton x:Name="BurnInRadio" Content="Burn-in (Hard Subs)" GroupName="ExportMode" Grid.Row="1" Margin="0,0,0,8" Style="{StaticResource MaterialDesignRadioButton}" />
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
-          <TextBlock Text="ASS Style" VerticalAlignment="Center" Width="80" Foreground="{StaticResource VsMutedTextBrush}" />
-          <TextBox x:Name="StyleBox" Width="200" />
+          <TextBlock Text="ASS Style" VerticalAlignment="Center" Width="80" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+          <TextBox x:Name="StyleBox" Width="200" Style="{StaticResource MaterialDesignOutlinedTextBox}" />
         </StackPanel>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-          <Button Width="90" Margin="0,0,8,0" Click="OnCancel">Cancel</Button>
-          <Button Width="90" Style="{StaticResource PrimaryButton}" Click="OnSave">Export</Button>
+          <Button Width="90" Margin="0,0,8,0" Click="OnCancel" Style="{StaticResource MaterialDesignOutlinedButton}">Cancel</Button>
+          <Button Width="90" Click="OnSave" Style="{StaticResource MaterialDesignRaisedButton}">Export</Button>
         </StackPanel>
       </Grid>
-    </Border>
+    </materialDesign:Card>
   </Grid>
 </Window>

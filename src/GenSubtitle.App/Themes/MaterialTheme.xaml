@@ -1,0 +1,22 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+  <!-- Custom Color Palette -->
+  <Color x:Key="PrimaryColor">#1976D2</Color>
+  <Color x:Key="PrimaryLightColor">#63A4FF</Color>
+  <Color x:Key="PrimaryDarkColor">#004BA0</Color>
+
+  <Color x:Key="SecondaryColor">#00796B</Color>
+  <Color x:Key="SecondaryLightColor">#48A999</Color>
+  <Color x:Key="SecondaryDarkColor">#004C40</Color>
+
+  <!-- Apply to Material Design Theme -->
+  <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="{StaticResource PrimaryLightColor}" />
+  <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="{StaticResource PrimaryColor}" />
+  <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="{StaticResource PrimaryDarkColor}" />
+
+  <SolidColorBrush x:Key="SecondaryHueLightBrush" Color="{StaticResource SecondaryLightColor}" />
+  <SolidColorBrush x:Key="SecondaryHueMidBrush" Color="{StaticResource SecondaryColor}" />
+  <SolidColorBrush x:Key="SecondaryHueDarkBrush" Color="{StaticResource SecondaryDarkColor}" />
+</ResourceDictionary>

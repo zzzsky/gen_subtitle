@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenSubtitle 详细设计方案</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px;
+        }
+        .section {
+            margin-bottom: 50px;
+        }
+        .section h2 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .section h2 .num {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        .subsection {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .subsection h3 {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .subsection h4 {
+            font-size: 16px;
+            color: #555;
+            margin: 15px 0 10px;
+        }
+        .mockup {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .mockup-header {
+            background: #e3f2fd;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        .state-diagram {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .state-box {
+            display: inline-block;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px 25px;
+            margin: 10px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .state-arrow {
+            display: inline-block;
+            color: #999;
+            font-size: 24px;
+            margin: 0 10px;
+        }
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .feature-card {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .feature-card h4 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .feature-card p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .feature-card .priority {
+            display: inline-block;
+            background: #ff5722;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin-top: 8px;
+        }
+        .priority-low {
+            background: #4caf50;
+        }
+        .priority-medium {
+            background: #ff9800;
+        }
+        .priority-high {
+            background: #ff5722;
+        }
+        ul {
+            margin-left: 20px;
+            line-height: 1.8;
+            color: #555;
+        }
+        .approval-box {
+            background: #fff3e0;
+            border: 2px solid #ffb74d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .approval-box h4 {
+            color: #e65100;
+            margin-bottom: 10px;
+        }
+        .approval-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 GenSubtitle 详细设计方案</h1>
+            <p>渐进式界面 + 15个增强功能的完整设计</p>
+        </div>
+
+        <div class="content">
+            <!-- 第一部分：整体架构 -->
+            <div class="section">
+                <h2><span class="num">1</span> 整体架构设计</h2>
+
+                <div class="subsection">
+                    <h3>界面状态流转</h3>
+                    <div class="state-diagram">
+                        <div class="state-box">🏠 空闲状态<br><small>引导页</small></div>
+                        <span class="state-arrow">→</span>
+                        <div class="state-box">⚙️ 处理中<br><small>进度概览</small></div>
+                        <span class="state-arrow">→</span>
+                        <div class="state-box">✅ 已完成<br><small>编辑模式</small></div>
+                    </div>
+
+                    <h4 style="margin-top:20px;">状态切换逻辑：</h4>
+                    <ul>
+                        <li><strong>空闲 → 处理中</strong>：导入第一个视频文件后自动切换</li>
+                        <li><strong>处理中 → 已完成</strong>：选中已完成的任务时切换</li>
+                        <li><strong>已完成 → 处理中</strong>：点击任务队列按钮或选中处理中的任务</li>
+                        <li><strong>任意状态 → 空闲</strong>：所有任务完成并清空后返回</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 第二部分：三种状态界面 -->
+            <div class="section">
+                <h2><span class="num">2</span> 三种状态界面设计</h2>
+
+                <!-- 2.1 空闲状态 -->
+                <div class="subsection">
+                    <h3>2.1 空闲状态（无任务）</h3>
+                    <div class="mockup">
+                        <div class="mockup-header">引导页面布局</div>
+                        <div style="text-align:center;padding:40px;background:#fafafa;border-radius:4px;">
+                            <div style="font-size:48px;margin-bottom:20px;">🎬</div>
+                            <h3 style="color:#333;margin-bottom:10px;">欢迎使用 GenSubtitle</h3>
+                            <p style="color:#666;margin-bottom:30px;">智能双语字幕生成工具</p>
+                            <button style="background:#667eea;color:white;border:none;padding:15px 40px;border-radius:8px;font-size:16px;cursor:pointer;">
+                                📁 导入视频文件
+                            </button>
+                            <div style="margin-top:30px;color:#999;font-size:13px;">
+                                支持拖拽文件到窗口<br>
+                                或点击上方按钮选择文件
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4>功能要点：</h4>
+                    <ul>
+                        <li>显示应用Logo和欢迎语</li>
+                        <li>大号"导入视频"按钮，突出主要操作</li>
+                        <li>支持拖拽文件导入</li>
+                        <li>显示最近处理的任务（如果有）</li>
+                        <li>提供"使用教程"链接</li>
+                    </ul>
+
+                    <div class="approval-box">
+                        <h4>❓ 这部分设计可以吗？</h4>
+                        <p>空闲状态的引导页应该简洁友好，让新用户知道如何开始。</p>
+                    </div>
+                </div>
+
+                <!-- 2.2 处理中状态 -->
+                <div class="subsection">
+                    <h3>2.2 处理中状态（有任务在运行）</h3>
+                    <div class="mockup">
+                        <div class="mockup-header">处理中界面布局</div>
+                        <div style="display:grid;grid-template-columns:1fr 300px;gap:15px;">
+                            <div>
+                                <div style="background:#e3f2fd;padding:15px;border-radius:8px;margin-bottom:15px;">
+                                    <h4 style="margin:0 0 10px 0;">📊 处理概览</h4>
+                                    <div style="display:flex;gap:20px;font-size:13px;color:#555;">
+                                        <span>运行中: <strong>2/5</strong></span>
+                                        <span>队列中: <strong>3</strong></span>
+                                        <span>已完成: <strong>12</strong></span>
+                                        <span>失败: <strong>0</strong></span>
+                                    </div>
+                                </div>
+                                <div style="background:white;border:1px solid #ddd;border-radius:8px;padding:15px;">
+                                    <h4 style="margin:0 0 15px 0;">任务列表</h4>
+                                    <div style="border:1px solid #eee;border-radius:4px;padding:10px;margin-bottom:10px;">
+                                        <div style="font-size:13px;font-weight:bold;margin-bottom:5px;">video1.mp4</div>
+                                        <div style="height:4px;background:#e0e0e0;border-radius:2px;margin:8px 0;">
+                                            <div style="height:100%;width:65%;background:#4caf50;border-radius:2px;"></div>
+                                        </div>
+                                        <div style="font-size:11px;color:#666;">转录中 65%</div>
+                                    </div>
+                                    <div style="border:1px solid #eee;border-radius:4px;padding:10px;">
+                                        <div style="font-size:13px;font-weight:bold;margin-bottom:5px;">video2.mp4</div>
+                                        <div style="height:4px;background:#e0e0e0;border-radius:2px;margin:8px 0;">
+                                            <div style="height:100%;width:30%;background:#2196f3;border-radius:2px;"></div>
+                                        </div>
+                                        <div style="font-size:11px;color:#666;">翻译中 30%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="background:white;border:1px solid #ddd;border-radius:8px;padding:15px;">
+                                <h4 style="margin:0 0 15px 0;">⚙️ 批量操作</h4>
+                                <button style="width:100%;margin-bottom:8px;padding:10px;background:#4caf50;color:white;border:none;border-radius:4px;cursor:pointer;">全部导出</button>
+                                <button style="width:100%;margin-bottom:8px;padding:10px;background:#ff9800;color:white;border:none;border-radius:4px;cursor:pointer;">暂停全部</button>
+                                <button style="width:100%;padding:10px;background:#f44336;color:white;border:none;border-radius:4px;cursor:pointer;">清空完成</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4>功能要点：</h4>
+                    <ul>
+                        <li><strong>顶部统计卡片</strong>：运行中/队列中/已完成/失败数量</li>
+                        <li><strong>任务列表</strong>：显示所有任务，处理中的任务高亮显示</li>
+                        <li><strong>批量操作面板</strong>：全部导出、暂停全部、清空已完成</li>
+                        <li><strong>实时进度</strong>：每个任务显示进度条和当前阶段</li>
+                        <li>保留简化的日志输出（可折叠）</li>
+                    </ul>
+
+                    <div class="approval-box">
+                        <h4>❓ 这部分设计可以吗？</h4>
+                        <p>处理中界面聚焦于进度监控和批量操作，不显示编辑功能。</p>
+                    </div>
+                </div>
+
+                <!-- 2.3 已完成状态 -->
+                <div class="subsection">
+                    <h3>2.3 已完成状态（选中完成的任务）</h3>
+                    <div class="mockup">
+                        <div class="mockup-header">编辑模式界面布局</div>
+                        <div style="display:grid;grid-template-columns:280px 1fr;gap:15px;">
+                            <div style="background:white;border:1px solid #ddd;border-radius:8px;padding:15px;">
+                                <h4 style="margin:0 0 10px 0;">任务列表</h4>
+                                <div style="border:2px solid #667eea;border-radius:4px;padding:10px;margin-bottom:8px;background:#f8f9ff;">
+                                    <div style="font-size:13px;font-weight:bold;">video1.mp4</div>
+                                    <div style="font-size:11px;color:#4caf50;margin-top:4px;">✓ 已完成</div>
+                                </div>
+                                <div style="border:1px solid #eee;border-radius:4px;padding:10px;">
+                                    <div style="font-size:13px;font-weight:bold;">video2.mp4</div>
+                                    <div style="font-size:11px;color:#999;margin-top:4px;">处理中</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display:grid;grid-template-rows:auto 1fr auto;gap:10px;">
+                                    <div style="background:#333;border-radius:8px;padding:15px;color:white;text-align:center;">
+                                        🎬 视频预览区域<br>
+                                        <small style="color:#999;">播放器 + 控制条</small>
+                                    </div>
+                                    <div style="background:white;border:1px solid #ddd;border-radius:8px;padding:15px;">
+                                        <h4 style="margin:0 0 10px 0;">字幕编辑</h4>
+                                        <div style="border:1px solid #eee;border-radius:4px;padding:10px;font-size:12px;color:#666;">
+                                            字幕表格 / 时间轴编辑器<br>
+                                            显示序号、时间、原文、译文
+                                        </div>
+                                    </div>
+                                    <div style="display:flex;gap:10px;">
+                                        <button style="flex:1;padding:12px;background:#4caf50;color:white;border:none;border-radius:4px;cursor:pointer;">导出</button>
+                                        <button style="flex:1;padding:12px;background:#2196f3;color:white;border:none;border-radius:4px;cursor:pointer;">批量调整</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4>功能要点：</h4>
+                    <ul>
+                        <li><strong>左侧任务栏</strong>：显示所有任务，当前选中高亮</li>
+                        <li><strong>视频预览</strong>：完整播放器，支持时间轴对齐</li>
+                        <li><strong>字幕编辑表格</strong>：可编辑时间、文本，支持快捷键</li>
+                        <li><strong>底部操作栏</strong>：导出、批量调整、样式编辑等</li>
+                    </ul>
+
+                    <div class="approval-box">
+                        <h4>❓ 这部分设计可以吗？</h4>
+                        <p>完成状态自动展开编辑界面，方便精细调整。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第三部分：15个功能 -->
+            <div class="section">
+                <h2><span class="num">3</span> 15个增强功能设计</h2>
+
+                <div class="subsection">
+                    <h3>功能优先级分类</h3>
+
+                    <h4>🔥 高优先级（核心体验）</h4>
+                    <div class="feature-list">
+                        <div class="feature-card">
+                            <h4>🎯 批量操作</h4>
+                            <p>全选任务、批量导出、批量删除、批量调整时间偏移</p>
+                            <span class="priority priority-high">高优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🔍 搜索过滤</h4>
+                            <p>按文件名搜索任务、按状态筛选（完成/失败/处理中）</p>
+                            <span class="priority priority-high">高优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📊 任务统计</h4>
+                            <p>显示总任务数、成功/失败统计、平均处理时间</p>
+                            <span class="priority priority-high">高优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>⌨️ 快捷键支持</h4>
+                            <p>空格播放/暂停、方向键微调时间、Ctrl+O导入、Del删除</p>
+                            <span class="priority priority-high">高优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>💾 自动保存</h4>
+                            <p>编辑中自动保存进度，防止意外关闭丢失数据</p>
+                            <span class="priority priority-high">高优先级</span>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-top:30px;">⚡ 中优先级（增强功能）</h4>
+                    <div class="feature-list">
+                        <div class="feature-card">
+                            <h4>⏱️ 批量时间调整</h4>
+                            <p>全局偏移、按比例缩放时间、合并重复字幕</p>
+                            <span class="priority priority-medium">中优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🔄 重新翻译</h4>
+                            <p>选中部分字幕重新翻译、切换不同翻译模型</p>
+                            <span class="priority priority-medium">中优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🎨 字幕样式编辑</h4>
+                            <p>可视化编辑ASS字幕样式（字体、颜色、位置）</p>
+                            <span class="priority priority-medium">中优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📤 更多导出格式</h4>
+                            <p>支持VTT、SSA、TXT纯文本等格式导出</p>
+                            <span class="priority priority-medium">中优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📋 模板管理</h4>
+                            <p>保存常用翻译提示词模板、字幕样式预设、导出配置</p>
+                            <span class="priority priority-medium">中优先级</span>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-top:30px;">💡 低优先级（锦上添花）</h4>
+                    <div class="feature-list">
+                        <div class="feature-card">
+                            <h4>🔔 完成通知</h4>
+                            <p>所有任务完成后播放提示音或系统通知</p>
+                            <span class="priority priority-low">低优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📁 文件关联</h4>
+                            <p>右键视频文件直接发送到GenSubtitle处理</p>
+                            <span class="priority priority-low">低优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🎙️ 多语言识别</h4>
+                            <p>自动检测视频中语言切换，分段识别</p>
+                            <span class="priority priority-low">低优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🗂️ 任务分组</h4>
+                            <p>按日期、文件夹、标签对任务进行分组管理</p>
+                            <span class="priority priority-low">低优先级</span>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📖 使用向导</h4>
+                            <p>首次使用时显示引导教程，说明功能和使用流程</p>
+                            <span class="priority priority-low">低优先级</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第四部分：实现计划 -->
+            <div class="section">
+                <h2><span class="num">4</span> 实现阶段规划</h2>
+
+                <div class="subsection">
+                    <h3>第一阶段：核心界面重构（2-3周）</h3>
+                    <ul>
+                        <li>实现渐进式界面框架和状态管理</li>
+                        <li>空闲状态引导页</li>
+                        <li>处理中状态进度页</li>
+                        <li>完成状态编辑页</li>
+                        <li>状态自动切换逻辑</li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <h3>第二阶段：高优先级功能（1-2周）</h3>
+                    <ul>
+                        <li>批量操作：全选、批量导出、批量删除</li>
+                        <li>搜索过滤：文件名搜索、状态筛选</li>
+                        <li>任务统计：统计面板、处理时间</li>
+                        <li>快捷键支持：主要操作的快捷键</li>
+                        <li>自动保存：编辑状态持久化</li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <h3>第三阶段：中优先级功能（1-2周）</h3>
+                    <ul>
+                        <li>批量时间调整：偏移、缩放、合并</li>
+                        <li>重新翻译功能</li>
+                        <li>字幕样式编辑器</li>
+                        <li>更多导出格式</li>
+                        <li>模板管理系统</li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <h3>第四阶段：低优先级功能（1周）</h3>
+                    <ul>
+                        <li>完成通知</li>
+                        <li>文件关联</li>
+                        <li>多语言识别</li>
+                        <li>任务分组</li>
+                        <li>使用向导</li>
+                    </ul>
+                </div>
+
+                <div class="approval-box">
+                    <h4>❓ 实现阶段可以吗？</h4>
+                    <p>总共约5-8周完成所有功能。我们可以根据实际情况调整优先级。</p>
+                </div>
+            </div>
+
+            <!-- 确认部分 -->
+            <div class="section">
+                <h2><span class="num">5</span> 设计确认</h2>
+
+                <div class="subsection" style="background:#e8f5e9;border:2px solid #4caf50;">
+                    <h3 style="color:#2e7d32;">✅ 设计概览</h3>
+                    <p style="color:#333;font-size:15px;line-height:1.8;">
+                        <strong>界面方案：</strong>渐进式界面（方案B）<br>
+                        <strong>核心特性：</strong>根据任务状态自动切换界面<br>
+                        <strong>三种状态：</strong>空闲（引导页）→ 处理中（进度页）→ 完成（编辑页）<br>
+                        <strong>新增功能：</strong>15个增强功能，按优先级分4阶段实现<br>
+                        <strong>预计时间：</strong>5-8周完成所有功能
+                    </p>
+
+                    <div class="approval-box" style="background:#fff3e0;border-color:#ffb74d;margin-top:20px;">
+                        <h4 style="color:#e65100;">❓ 请确认以上设计</h4>
+                        <p>如果设计没问题，我将编写详细的设计文档，然后进入实现计划阶段。</p>
+                        <p style="margin-top:10px;"><strong>如果有任何需要调整的地方，请告诉我！</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

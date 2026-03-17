@@ -12,6 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
+    <PackageReference Include="MaterialDesignColors" Version="2.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="ffmpeg\x64\ffmpeg.exe" Condition="Exists('ffmpeg\\x64\\ffmpeg.exe')" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

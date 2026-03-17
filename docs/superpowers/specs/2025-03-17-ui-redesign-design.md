@@ -1,8 +1,8 @@
 # GenSubtitle UI 重新设计规格文档
 
 **日期:** 2025-03-17
-**状态:** 设计阶段
-**版本:** 1.0
+**状态:** 设计阶段（审查中 - v1.1 已修复问题）
+**版本:** 1.1
 
 ## 概述
 
@@ -26,12 +26,56 @@
 
 ### 状态切换逻辑
 
-| 触发条件 | 状态转换 | 说明 |
-|---------|---------|------|
-| 导入第一个视频文件 | 空闲 → 处理中 | 自动显示进度界面 |
-| 选中已完成的任务 | 处理中 → 已完成 | 切换到编辑模式 |
-| 点击任务队列按钮或选中处理中的任务 | 已完成 → 处理中 | 返回进度概览 |
-| 所有任务完成并清空 | 任意 → 空闲 | 返回引导页面 |
+#### 状态优先级规则
+
+当多个任务处于不同状态时，按以下优先级决定界面状态：
+
+1. **Processing 状态优先** - 如果有任何任务处于 Transcribing 或 Translating 状态，显示处理中界面
+2. **Editing 状态条件** - 只有当用户**显式选中**已完成任务时，才切换到编辑界面
+3. **Idle 状态条件** - 任务列表为空时，自动返回空闲状态
+
+#### 详细状态转换表
+
+| 当前状态 | 触发条件 | 目标状态 | 允许 | 说明 |
+|---------|---------|---------|------|------|
+| Idle | 导入第一个视频文件 | Processing | ✓ | 自动切换到进度界面 |
+| Idle | 用户手动操作 | Processing | ✗ | 禁止直接跳转，必须先导入文件 |
+| Idle | 任意操作 | Editing | ✗ | 禁止跳转，必须先经过 Processing |
+| Processing | 所有任务清空 | Idle | ✓ | 返回引导页面 |
+| Processing | 有任务正在处理中 | Idle | ✗ | 禁止跳转，必须等待任务完成 |
+| Processing | 用户选中已完成任务 | Editing | ✓ | 切换到编辑模式 |
+| Processing | 用户点击"返回引导页" | Idle | ✗ | 禁止跳转，必须先清空任务 |
+| Editing | 所有任务清空 | Idle | ✓ | 返回引导页面 |
+| Editing | 用户点击"返回进度页"或选中处理中任务 | Processing | ✓ | 返回进度概览 |
+| Editing | 有新任务开始处理 | Processing | ✓ | 自动切换回处理中界面 |
+
+#### 状态转换矩阵
+
+```
+         Idle  Processing  Editing
+Idle      -        ✓         ✗
+Processing ✓       -         ✓
+Editing   ✓        ✓         -
+```
+
+（✓ = 允许转换，✗ = 禁止转换）
+
+#### 边界情况处理
+
+**情况1：多任务混合状态**
+- 场景：3个任务处理中，2个任务已完成
+- 行为：默认显示 Processing 界面
+- 用户可手动选择已完成任务切换到 Editing 界面
+
+**情况2：所有任务完成但未清空**
+- 场景：5个任务全部完成，用户未操作
+- 行为：保持在 Processing 界面，显示"全部完成"状态
+- 用户可手动选择任务进入 Editing 界面
+
+**情况3：编辑时有新任务开始**
+- 场景：用户在 Editing 界面编辑，导入新文件
+- 行为：自动切换回 Processing 界面
+- 保留用户当前编辑内容（自动保存）
 
 ## 三种状态界面设计
 
@@ -99,7 +143,18 @@
 - **任务列表**：显示所有任务及实时进度
 - **批量操作面板**：全部导出、暂停全部、清空已完成
 - 每个任务显示进度条和当前阶段
-- 保留简化的日志输出（可折叠）
+- **控制台日志**：可折叠面板，默认折叠，仅在出错时自动展开
+
+**控制台日志放置规范：**
+
+- **Idle 状态**：完全隐藏（无日志输出需求）
+- **Processing 状态**：底部可折叠面板
+  - 默认折叠
+  - 出错时自动展开并高亮错误信息
+  - 可通过菜单"View → Console Log"手动展开
+- **Editing 状态**：完全隐藏
+  - 通过菜单"View → Console Log"打开独立日志窗口
+  - 日志窗口可关闭或最小化到系统托盘
 
 ### 3. 已完成状态（编辑页）
 
@@ -146,11 +201,26 @@
 - **批量删除**：选中多个任务批量删除
 - **批量时间调整**：统一调整字幕时间偏移
 
+**任务选择交互模型：**
+
+- **复选框列**：任务列表第一列添加复选框
+- **Ctrl+Click**：切换单个任务的选中状态
+- **Shift+Click**：选择连续范围内的任务
+- **全选/取消全选按钮**：批量操作面板顶部
+- **选中计数显示**：显示"已选 X 个任务"
+
 #### 2. 搜索过滤
 - **文件名搜索**：实时搜索任务文件名
 - **状态筛选**：按已完成/失败/处理中筛选
 - **日期筛选**：按今天/本周/本月筛选
 - **组合筛选**：支持多条件组合
+
+**搜索性能要求：**
+
+- **防抖搜索**：用户输入停止 300ms 后才执行搜索
+- **ICollectionView**：使用 WPF 内置过滤机制
+- **虚拟化**：任务数 > 50 时启用列表虚拟化
+- **性能指标**：搜索响应时间 < 100ms（100个任务）
 
 #### 3. 任务统计
 - **统计面板**：总任务数、成功/失败率
@@ -162,14 +232,48 @@
 - `←/→` - 微调时间轴（±0.1秒）
 - `Ctrl+O` - 导入文件
 - `Ctrl+S` - 保存编辑
+- `Ctrl+Z` - 撤销
+- `Ctrl+Y` 或 `Ctrl+Shift+Z` - 重做
 - `Del` - 删除选中任务
 - `Ctrl+A` - 全选任务
 - `Esc` - 取消选择
 
+**撤销/重做系统：**
+
+- **实现阶段**：第一阶段 B（编辑功能）
+- **命令模式**：所有编辑操作实现为 ICommand 对象
+- **撤销栈**：保存最近 50 个操作
+- **持久化**：撤销/重做历史随自动保存一起保存
+- **UI 反馈**：菜单项显示"撤销 [操作名称]"
+
 #### 5. 自动保存
-- 编辑过程中自动保存进度
-- 每30秒或每次修改后保存
-- 应用关闭后恢复编辑状态
+- **防抖保存**：用户停止编辑 2 秒后自动保存（而非固定 30 秒）
+- **冲突解决**：采用最后写入策略（Last-Write-Wins），基于时间戳比较
+- **用户通知**：自动保存覆盖未保存更改时显示通知
+- **恢复选项**：提供"从自动保存恢复"功能
+- **保存位置**：`{TaskOutputDir}/.autosave.json`
+- **保存内容**：字幕段落的编辑状态、选中项、滚动位置
+
+**冲突解决详细策略：**
+
+1. **自动保存触发条件**
+   - 用户修改字幕内容后 2 秒无操作
+   - 用户切换任务时
+   - 用户切换视图时（离开 Editing 状态）
+
+2. **冲突检测**
+   - 比较自动保存时间戳和用户上次手动保存时间戳
+   - 如果自动保存更新，显示提示："已自动保存您的编辑"
+
+3. **用户覆盖场景**
+   - 如果用户手动保存的版本较旧
+   - 自动保存会覆盖手动保存
+   - 显示通知："自动保存已覆盖手动保存 [撤销]"
+
+4. **自动保存恢复**
+   - 应用启动时检查自动保存文件
+   - 如果自动保存比缓存文件新，提示用户恢复
+   - 用户可选择：恢复自动保存 / 使用缓存 / 忽略
 
 ### 中优先级功能（增强功能）
 
@@ -234,6 +338,81 @@
 
 ### 架构变更
 
+#### ViewState 持久化策略
+
+**策略：不持久化界面状态，始终从 Idle 状态启动**
+
+**理由：**
+- 避免用户重启应用时进入混乱状态
+- 确保应用启动时界面清晰可预测
+- 减少状态恢复相关的 bug
+
+**实现细节：**
+
+1. **应用启动**
+   - 始终从 Idle 状态开始
+   - 加载缓存的已完成任务（如果有的话）
+   - 显示"最近处理任务"列表
+
+2. **状态保存**
+   - 保存最后选中的任务 ID（用于恢复编辑位置）
+   - 保存各面板的展开/折叠状态
+   - 保存窗口大小和位置
+
+3. **状态恢复**
+   - 如果有缓存的已完成任务，显示在 Idle 页面的"最近处理任务"区域
+   - 用户点击最近任务时，直接跳转到 Editing 界面
+
+**持久化数据结构：**
+
+```csharp
+public class ViewStatePersistence
+{
+    public Guid? LastSelectedTaskId { get; set; }
+    public bool ProcessingPanelExpanded { get; set; } = true;
+    public double WindowWidth { get; set; } = 1280;
+    public double WindowHeight { get; set; } = 820;
+}
+```
+
+#### 任务历史管理策略
+
+**策略：保留最近 20 个已完成任务，自动删除 30 天前的任务**
+
+**实现细节：**
+
+1. **任务保留规则**
+   - 默认保留最近 20 个已完成任务
+   - 30 天后自动删除（即使未达到 20 个）
+   - 用户可标记任务为"永久保留"
+
+2. **存储位置**
+   - 任务缓存：`C:\Users\Admin\Documents\GenSubtitle\.taskcache`
+   - 任务元数据：`C:\Users\Admin\Documents\GenSubtitle\.metadata.json`
+
+3. **元数据结构**
+
+```csharp
+public class TaskMetadata
+{
+    public Guid TaskId { get; set; }
+    public string FileName { get; set; }
+    public DateTime CompletedAt { get; set; }
+    public TimeSpan ProcessingDuration { get; set; }
+    public bool IsPinned { get; set; }  // 用户标记为永久保留
+}
+```
+
+4. **清理逻辑**
+   - 应用启动时检查并清理过期任务
+   - 删除任务缓存文件夹（如果元数据也过期）
+   - 保留被标记为永久保留的任务
+
+5. **"最近处理任务"显示**
+   - Idle 页面显示最多 5 个最近任务
+   - 按完成时间倒序排列
+   - 显示文件名、完成时间、处理时长
+
 #### 新增视图状态枚举
 
 ```csharp
@@ -247,20 +426,142 @@ public enum ViewState
 
 #### 新增 ViewStateManager
 
+**完整实现：**
+
 ```csharp
 public class ViewStateManager : ObservableObject
 {
+    private readonly ILogger _logger;
+    private readonly TaskQueueViewModel _taskQueue;
     private ViewState _currentState = ViewState.Idle;
+
     public ViewState CurrentState
     {
         get => _currentState;
         private set => SetProperty(ref _currentState, value);
     }
 
-    public void TransitionTo(ViewState newState, object context = null);
-    public bool CanTransitionTo(ViewState newState);
+    public ViewStateManager(TaskQueueViewModel taskQueue, ILogger logger)
+    {
+        _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    /// <summary>
+    /// 尝试转换到新状态
+    /// </summary>
+    /// <param name="newState">目标状态</param>
+    /// <param name="context">转换上下文（可选）</param>
+    /// <returns>转换是否成功</returns>
+    public bool TransitionTo(ViewState newState, object context = null)
+    {
+        if (!CanTransitionTo(newState))
+        {
+            _logger.LogWarning($"Invalid state transition: {CurrentState} → {newState}");
+            return false;
+        }
+
+        try
+        {
+            var oldState = CurrentState;
+            OnExitingState(oldState, newState);
+            CurrentState = newState;
+            OnEnteredState(newState, oldState);
+            _logger.LogInformation($"State transition: {oldState} → {newState}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"State transition failed: {CurrentState} → {newState}");
+            // 转换失败时，回退到 Idle 状态以确保安全
+            if (CurrentState != ViewState.Idle)
+            {
+                CurrentState = ViewState.Idle;
+            }
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 检查是否可以转换到目标状态
+    /// </summary>
+    public bool CanTransitionTo(ViewState newState)
+    {
+        // 状态转换矩阵
+        return (CurrentState, newState) switch
+        {
+            (ViewState.Idle, ViewState.Processing) => true,
+            (ViewState.Idle, ViewState.Editing) => false,
+
+            (ViewState.Processing, ViewState.Idle) => _taskQueue.Tasks.Count == 0,
+            (ViewState.Processing, ViewState.Editing) => true,
+
+            (ViewState.Editing, ViewState.Idle) => _taskQueue.Tasks.Count == 0,
+            (ViewState.Editing, ViewState.Processing) => true,
+
+            _ => false
+        };
+    }
+
+    private void OnExitingState(ViewState oldState, ViewState newState)
+    {
+        // 离开状态时的清理工作
+        switch (oldState)
+        {
+            case ViewState.Editing:
+                // 保存编辑状态
+                _logger.LogInformation("Exiting Editing state, saving edit position");
+                break;
+        }
+    }
+
+    private void OnEnteredState(ViewState newState, ViewState oldState)
+    {
+        // 进入状态时的初始化工作
+        switch (newState)
+        {
+            case ViewState.Idle:
+                _logger.LogInformation("Entered Idle state");
+                break;
+            case ViewState.Processing:
+                _logger.LogInformation($"Entered Processing state with {_taskQueue.Tasks.Count} tasks");
+                break;
+            case ViewState.Editing:
+                _logger.LogInformation("Entered Editing state");
+                break;
+        }
+    }
 }
 ```
+
+**ViewModel 所有权模型：**
+
+```
+MainViewModel (所有者)
+  ├── ViewStateManager
+  ├── TaskQueueViewModel (共享，通过构造函数传递)
+  ├── IdleViewModel
+  ├── ProcessingViewModel (持有 TaskQueueViewModel 引用)
+  └── EditingViewModel (持有 TaskQueueViewModel 引用)
+```
+
+**通信接口：**
+
+```csharp
+public interface ITaskQueueService
+{
+    ObservableCollection<TaskItemViewModel> Tasks { get; }
+    TaskItemViewModel? SelectedTask { get; set; }
+    void EnqueueFiles(string[] files);
+    Task ExportTaskAsync(TaskItemViewModel task, ExportOptions options, ...);
+    // ... 其他必要的方法
+}
+```
+
+**实现说明：**
+- MainViewModel 拥有 TaskQueueViewModel
+- 子 ViewModels 通过 ITaskQueueService 接口访问任务队列
+- 降低耦合，便于测试和维护
 
 ### UI 组件变更
 
@@ -313,28 +614,86 @@ public class MainViewModel : ObservableObject
 2. **ProcessingViewModel** - 进度页逻辑
 3. **EditingViewModel** - 编辑页逻辑
 
+#### 媒体播放器生命周期管理
+
+**跨状态播放器行为：**
+
+1. **离开 Editing 状态时**
+   - 自动暂停播放
+   - 保存当前播放位置（时间戳）
+   - 释放媒体资源（可选）
+
+2. **进入 Editing 状态时**
+   - 恢复上次播放位置
+   - 加载选中任务的媒体文件
+
+3. **切换到不同任务时**
+   - 保存当前任务的播放位置
+   - 加载新任务的播放位置
+   - 重置播放状态到暂停
+
+4. **在 Idle 状态时**
+   - 完全释放 MediaElement 资源
+   - 减少内存占用
+
+**播放位置存储：**
+
+```csharp
+public class PlaybackPosition
+{
+    public Guid TaskId { get; set; }
+    public TimeSpan Position { get; set; }
+    public DateTime LastUpdated { get; set; }
+}
+
+// 存储在任务元数据中
+public class TaskMetadata
+{
+    // ... 其他属性
+    public TimeSpan? LastPlaybackPosition { get; set; }
+}
+```
+
 ## 实现阶段
 
-### 第一阶段：核心界面重构（2-3周）
+### 第一阶段：核心界面重构（3-4周）
 
 **目标：** 实现渐进式界面框架
+
+#### 第一阶段 A：基础框架（1-2周）
 
 **任务清单：**
 
 - [ ] 创建 ViewStateManager 和状态枚举
+- [ ] 实现状态转换逻辑和验证
+- [ ] 创建 ITaskQueueService 接口
 - [ ] 实现 IdleView 和 IdleViewModel
-- [ ] 实现 ProcessingView 和 ProcessingViewModel
-- [ ] 实现 EditingView 和 EditingViewModel
-- [ ] 实现状态自动切换逻辑
 - [ ] 更新 MainWindow 以支持动态视图切换
-- [ ] 单元测试：状态转换逻辑
+- [ ] 单元测试：ViewStateManager 状态转换
+
+**验收标准：**
+
+- 应用启动显示 Idle 界面
+- 导入文件后自动切换到 Processing 界面
+- 状态转换逻辑正确（通过单元测试）
+
+#### 第一阶段 B：完整视图实现（1-2周）
+
+**任务清单：**
+
+- [ ] 实现 ProcessingView 和 ProcessingViewModel（不含批量操作）
+- [ ] 实现 EditingView 和 EditingViewModel
+- [ ] 实现任务列表显示
+- [ ] 实现视频播放器集成
+- [ ] 实现字幕编辑表格
+- [ ] 实现状态自动切换逻辑
 - [ ] 集成测试：完整的用户流程
 
 **验收标准：**
 
-- 空闲状态显示引导页，导入文件自动切换到处理中
-- 处理中状态显示进度列表，支持批量操作
+- 处理中状态显示任务列表和进度
 - 完成状态自动展开编辑界面
+- 视频预览和字幕编辑功能正常
 - 状态切换流畅，无明显卡顿
 
 ### 第二阶段：高优先级功能（1-2周）
@@ -486,6 +845,34 @@ public class MainViewModel : ObservableObject
 3. **对比度** - 文字和背景对比度足够
 4. **字体大小** - 支持系统字体缩放
 
+**键盘导航Tab顺序：**
+
+**Idle 视图：**
+1. 导入按钮
+2. 最近处理任务列表（第一项）
+3. 使用教程链接
+4. 设置按钮（标题栏）
+
+**Processing 视图：**
+1. 搜索框（如果有）
+2. 状态筛选下拉框
+3. 任务列表（第一项）
+4. 任务列表内导航（↑↓方向键）
+5. 批量操作按钮（全部导出、暂停全部、清空完成）
+6. 返回引导页按钮
+
+**Editing 视图：**
+1. 任务列表（第一项）
+2. 任务列表内导航（↑↓方向键）
+3. 视频播放器（播放/暂停按钮）
+4. 时间轴滑块
+5. 对齐开始按钮
+6. 对齐结束按钮
+7. 字幕表格（第一行）
+8. 字幕表格内导航（↑↓方向键）
+9. 导出按钮
+10. 返回进度页按钮
+
 ## 向后兼容性
 
 ### 保留现有功能
@@ -499,6 +886,29 @@ public class MainViewModel : ObservableObject
 - 自动迁移旧版本的任务缓存
 - 保留用户的设置和配置
 - 首次启动时检测并迁移数据
+
+**UI设置迁移策略：**
+
+1. **当前UI设置（需迁移）**
+   - 窗口大小和位置
+   - 各面板宽度（QueueColumn, PreviewColumn）
+   - 面板可见性状态
+
+2. **新UI设置**
+   - ViewState 偏好（默认Idle）
+   - 各面板展开/折叠状态
+   - ProcessingView: 任务列宽度、批量操作面板宽度
+   - EditingView: 预览区域大小、编辑表格列宽
+
+3. **迁移映射**
+   - 旧 QueueColumn.Width → 新 ProcessingView.TaskListWidth
+   - 旧 PreviewColumn.Width → 新 EditingView.PreviewWidth
+   - 窗口大小和位置直接迁移
+
+4. **默认值策略**
+   - 首次启动使用保守值（展开所有面板）
+   - 旧用户的列宽度设置迁移到对应新视图
+   - 无法映射的设置使用默认值
 
 ### API 变更
 
