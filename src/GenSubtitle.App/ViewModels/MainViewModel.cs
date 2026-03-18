@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GenSubtitle.App.Services;
 using GenSubtitle.App.Core;
 using GenSubtitle.Core.Models;
+using CoreTaskStatus = GenSubtitle.Core.Models.TaskStatus;
 
 namespace GenSubtitle.App.ViewModels;
 
@@ -29,6 +31,64 @@ public sealed class MainViewModel : ObservableObject
 
         // Set initial view
         _currentView = new IdleViewModel(taskQueueService);
+
+        // Subscribe to task queue changes for auto state transitions
+        Queue.Tasks.CollectionChanged += (s, e) => OnTasksChanged();
+        Queue.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(TaskQueueViewModel.SelectedTask))
+            {
+                OnTaskSelectionChanged();
+            }
+        };
+    }
+
+    private void OnTasksChanged()
+    {
+        // Auto-transition based on task count
+        if (Queue.Tasks.Count == 0 && _stateManager.CurrentState != ViewState.Idle)
+        {
+            _stateManager.TransitionTo(ViewState.Idle);
+            SwitchView(ViewState.Idle);
+        }
+        else if (Queue.Tasks.Count > 0 && _stateManager.CurrentState == ViewState.Idle)
+        {
+            _stateManager.TransitionTo(ViewState.Processing);
+            SwitchView(ViewState.Processing);
+        }
+    }
+
+    private void OnTaskSelectionChanged()
+    {
+        var selectedTask = Queue.SelectedTask;
+        var currentState = _stateManager.CurrentState;
+
+        if (selectedTask == null)
+        {
+            // No task selected
+            if (Queue.Tasks.Count == 0)
+            {
+                _stateManager.TransitionTo(ViewState.Idle);
+                SwitchView(ViewState.Idle);
+            }
+            else if (currentState == ViewState.Editing)
+            {
+                _stateManager.TransitionTo(ViewState.Processing);
+                SwitchView(ViewState.Processing);
+            }
+        }
+        else if (selectedTask.Status == CoreTaskStatus.Completed && currentState != ViewState.Editing)
+        {
+            // Completed task selected - switch to editing
+            _stateManager.TransitionTo(ViewState.Editing);
+            SwitchView(ViewState.Editing);
+        }
+        else if (selectedTask.Status != CoreTaskStatus.Completed && currentState == ViewState.Editing)
+        {
+            // Non-completed task selected while in editing - switch to processing
+            _stateManager.TransitionTo(ViewState.Processing);
+            SwitchView(ViewState.Processing);
+        }
     }
 
     public TaskQueueViewModel Queue { get; }
