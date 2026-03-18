@@ -8,9 +8,39 @@
              d:DataContext="{d:DesignInstance vm:EditingViewModel}"
              mc:Ignorable="d">
     <Grid>
-        <!-- Placeholder layout - full implementation in Tasks 14-15 -->
-        <TextBlock Text="视频播放器和字幕编辑器将在这里显示"
-                   FontSize="14" Foreground="{DynamicResource MaterialDesignBodyLightBrush}"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>          <!-- Video player -->
+            <RowDefinition Height="Auto"/>       <!-- Player controls -->
+            <RowDefinition Height="Auto"/>       <!-- Timeline slider -->
+            <RowDefinition Height="*"/>          <!-- Subtitle editor (Task 15) -->
+        </Grid.RowDefinitions>
+
+        <!-- Video Player -->
+        <materialDesign:Card Grid.Row="0" Margin="8">
+            <Border Background="#0E0E0E" CornerRadius="4" Margin="8">
+                <MediaElement x:Name="Player" LoadedBehavior="Manual" UnloadedBehavior="Manual" ScrubbingEnabled="True" Stretch="Uniform"/>
+            </Border>
+        </materialDesign:Card>
+
+        <!-- Player Controls -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,8">
+            <Button Content="播放" Style="{StaticResource MaterialDesignRaisedButton}" Width="80" Margin="0,0,8,0" Click="OnPlay"/>
+            <Button Content="暂停" Style="{StaticResource MaterialDesignRaisedButton}" Width="80" Margin="0,0,8,0" Click="OnPause"/>
+            <Button Content="对齐开始" Style="{StaticResource MaterialDesignOutlinedButton}" Width="90" Margin="0,0,8,0" Click="OnAlignStart"/>
+            <Button Content="对齐结束" Style="{StaticResource MaterialDesignOutlinedButton}" Width="90" Click="OnAlignEnd"/>
+        </StackPanel>
+
+        <!-- Timeline Slider -->
+        <StackPanel Grid.Row="2" Orientation="Vertical" Margin="150,8,150,8">
+            <Slider x:Name="TimelineSlider" Minimum="0" Maximum="1" ValueChanged="OnTimelineChanged"/>
+            <TextBlock x:Name="TimeDisplay" Text="00:00 / 00:00" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Subtitle Editor placeholder (Task 15) -->
+        <materialDesign:Card Grid.Row="3" Margin="8">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock Text="字幕编辑表格区域" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+            </ScrollViewer>
+        </materialDesign:Card>
     </Grid>
 </UserControl>
