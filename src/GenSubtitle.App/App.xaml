@@ -2,6 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:GenSubtitle.App.ViewModels"
+             xmlns:v="clr-namespace:GenSubtitle.App.Views"
              StartupUri="Views/MainWindow.xaml">
   <Application.Resources>
     <ResourceDictionary>
@@ -23,6 +25,19 @@
       <FontFamily x:Key="UiFont">Segoe UI</FontFamily>
       <Thickness x:Key="CardPadding">12</Thickness>
       <CornerRadius x:Key="CardRadius">6</CornerRadius>
+
+      <!-- DataTemplates for view switching -->
+      <DataTemplate DataType="{x:Type vm:IdleViewModel}">
+        <v:IdleView/>
+      </DataTemplate>
+
+      <DataTemplate DataType="{x:Type vm:ProcessingViewModel}">
+        <v:ProcessingView/>
+      </DataTemplate>
+
+      <DataTemplate DataType="{x:Type vm:EditingViewModel}">
+        <v:EditingView/>
+      </DataTemplate>
     </ResourceDictionary>
   </Application.Resources>
 </Application>
