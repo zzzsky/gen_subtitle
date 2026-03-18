@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using GenSubtitle.App.Services;
+using GenSubtitle.App.Core;
 using GenSubtitle.Core.Models;
 
 namespace GenSubtitle.App.ViewModels;
@@ -11,15 +12,46 @@ public sealed class MainViewModel : ObservableObject
     private readonly SettingsService _settingsService = new();
     private AppSettings _settings;
     private TaskItemViewModel? _selectedTask;
+    private readonly ViewStateManager _stateManager;
+    private object _currentView;
 
     public MainViewModel()
     {
         _settings = _settingsService.Load();
         Queue = new TaskQueueViewModel(_settings);
         Queue.LoadCachedTasks();
+
+        // Create task queue service adapter
+        var taskQueueService = new TaskQueueServiceAdapter(Queue);
+
+        // Create state manager
+        _stateManager = new ViewStateManager(taskQueueService, new ConsoleLogger());
+
+        // Set initial view
+        _currentView = new IdleViewModel(taskQueueService);
     }
 
     public TaskQueueViewModel Queue { get; }
+
+    public ViewStateManager StateManager => _stateManager;
+
+    public object CurrentView
+    {
+        get => _currentView;
+        private set => SetProperty(ref _currentView, value);
+    }
+
+    public void SwitchView(ViewState state)
+    {
+        var taskQueueService = new TaskQueueServiceAdapter(Queue);
+        CurrentView = state switch
+        {
+            ViewState.Idle => new IdleViewModel(taskQueueService),
+            ViewState.Processing => new ProcessingViewModel(taskQueueService),
+            ViewState.Editing => new EditingViewModel(taskQueueService),
+            _ => throw new ArgumentException($"Invalid view state: {state}")
+        };
+    }
 
     public AppSettings Settings
     {
