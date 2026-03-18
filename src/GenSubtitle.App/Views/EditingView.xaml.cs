@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -32,6 +33,53 @@ public partial class EditingView : UserControl
                 TimelineSlider.Maximum = Player.NaturalDuration.TimeSpan.TotalSeconds;
             }
         };
+
+        // Subscribe to video load requests
+        this.Loaded += (s, e) =>
+        {
+            if (DataContext is ViewModels.EditingViewModel vm)
+            {
+                vm.LoadVideoRequested += OnLoadVideoRequested;
+                // Load initial video if path exists
+                if (vm.CurrentVideoPath is not null)
+                {
+                    OnLoadVideoRequested(vm, vm.CurrentVideoPath);
+                }
+            }
+        };
+
+        this.Unloaded += (s, e) =>
+        {
+            if (DataContext is ViewModels.EditingViewModel vm)
+            {
+                vm.LoadVideoRequested -= OnLoadVideoRequested;
+            }
+        };
+
+        this.DataContextChanged += (s, e) =>
+        {
+            if (e.OldValue is ViewModels.EditingViewModel oldVm)
+            {
+                oldVm.LoadVideoRequested -= OnLoadVideoRequested;
+            }
+            if (e.NewValue is ViewModels.EditingViewModel newVm)
+            {
+                newVm.LoadVideoRequested += OnLoadVideoRequested;
+                if (newVm.CurrentVideoPath is not null)
+                {
+                    OnLoadVideoRequested(newVm, newVm.CurrentVideoPath);
+                }
+            }
+        };
+    }
+
+    private void OnLoadVideoRequested(object? sender, string videoPath)
+    {
+        if (File.Exists(videoPath))
+        {
+            Player.Source = new Uri(videoPath);
+            Player.Position = TimeSpan.Zero;
+        }
     }
 
     private void OnPlay(object sender, RoutedEventArgs e)
