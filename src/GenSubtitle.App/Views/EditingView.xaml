@@ -36,11 +36,26 @@
             <TextBlock x:Name="TimeDisplay" Text="00:00 / 00:00" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,4,0,0"/>
         </StackPanel>
 
-        <!-- Subtitle Editor placeholder (Task 15) -->
+        <!-- Subtitle Editor -->
         <materialDesign:Card Grid.Row="3" Margin="8">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <TextBlock Text="字幕编辑表格区域" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBodyLight}"/>
-            </ScrollViewer>
+            <DataGrid ItemsSource="{Binding SelectedTask.Segments}"
+                      SelectedItem="{Binding SelectedTask.SelectedSegment}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      SelectionMode="Single"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      materialDesign:DataGridAssist.CellPadding="8"
+                      Style="{StaticResource MaterialDesignDataGrid}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="#" Binding="{Binding Id}" Width="40"/>
+                    <DataGridTextColumn Header="开始" Binding="{Binding Start}" Width="90"/>
+                    <DataGridTextColumn Header="结束" Binding="{Binding End}" Width="90"/>
+                    <DataGridTextColumn Header="原文" Binding="{Binding SourceText}" Width="*"/>
+                    <DataGridTextColumn Header="中文" Binding="{Binding ZhText}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
         </materialDesign:Card>
     </Grid>
 </UserControl>
