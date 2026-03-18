@@ -8,14 +8,43 @@
              d:DataContext="{d:DesignInstance vm:ProcessingViewModel}"
              mc:Ignorable="d">
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="16">
-                <TextBlock Text="任务列表" FontSize="24" FontWeight="Bold" Margin="0,0,0,16"/>
+        <materialDesign:Card Margin="16" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                <!-- Placeholder for task list - will be implemented in Task 13 -->
-                <TextBlock Text="任务列表将在这里显示" FontSize="14" Foreground="{DynamicResource MaterialDesignBodyLightBrush}"
-                           HorizontalAlignment="Center" VerticalAlignment="Center" Padding="32"/>
-            </StackPanel>
-        </ScrollViewer>
+                <TextBlock Grid.Row="0" Text="任务列表" FontSize="24" FontWeight="Bold" Margin="0,0,0,16"/>
+
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding Tasks}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          SelectionMode="Single"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          materialDesign:DataGridAssist.CellPadding="8"
+                          Style="{StaticResource MaterialDesignDataGrid}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="文件名" Binding="{Binding FileName}" Width="*" MinWidth="200"/>
+                        <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="100"/>
+                        <DataGridTemplateColumn Header="进度" Width="150">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <ProgressBar Value="{Binding Progress}" Maximum="100" Height="16"/>
+                                        <TextBlock Text="{Binding ProgressText}" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="模型" Binding="{Binding Model}" Width="100"/>
+                        <DataGridTextColumn Header="语言" Binding="{Binding DetectedLanguage}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </materialDesign:Card>
     </Grid>
 </UserControl>
