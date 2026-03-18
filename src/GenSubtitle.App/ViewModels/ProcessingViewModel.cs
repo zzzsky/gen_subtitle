@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using GenSubtitle.App.Services;
 
 namespace GenSubtitle.App.ViewModels;
@@ -14,7 +16,8 @@ public class ProcessingViewModel : ObservableObject
     {
         _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
         // NO base() call - ObservableObject has parameterless constructor
-        EditCommand = new RelayCommand(() => EditSelectedTask());
+        EditCommand = new RelayCommand(EditSelectedTask, CanEditSelectedTask);
+        ReturnToIdleCommand = new RelayCommand(ReturnToIdle, CanReturnToIdle);
     }
 
     public System.Collections.ObjectModel.ObservableCollection<TaskItemViewModel> Tasks => _taskQueue.Tasks;
@@ -32,12 +35,31 @@ public class ProcessingViewModel : ObservableObject
     }
 
     public RelayCommand EditCommand { get; }
+    public RelayCommand ReturnToIdleCommand { get; }
+
+    private bool CanEditSelectedTask()
+    {
+        return SelectedTask?.Status == Core.Models.TaskStatus.Completed;
+    }
 
     private void EditSelectedTask()
     {
-        if (SelectedTask != null)
+        // Selection already triggers state transition via MainViewModel
+        // This button is just for explicit user action
+    }
+
+    private bool CanReturnToIdle()
+    {
+        return _taskQueue.Tasks.Count == 0;
+    }
+
+    private void ReturnToIdle()
+    {
+        // Clear all tasks to return to idle state
+        var tasks = _taskQueue.Tasks.ToList();
+        foreach (var task in tasks)
         {
-            // TODO: Trigger transition to Editing state (Task 16)
+            _taskQueue.DeleteTask(task, false, true);
         }
     }
 }
