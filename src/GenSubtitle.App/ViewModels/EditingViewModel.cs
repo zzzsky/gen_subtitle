@@ -14,13 +14,22 @@ public class EditingViewModel : ObservableObject
         _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
         // NO base() call - ObservableObject has parameterless constructor
         SelectedTask = _taskQueue.SelectedTask;
+        ReturnToProcessingCommand = new RelayCommand(ReturnToProcessing);
     }
 
     public TaskItemViewModel? SelectedTask { get; private set; }
+
+    public RelayCommand ReturnToProcessingCommand { get; }
 
     public void SetSelectedTask(TaskItemViewModel? task)
     {
         SelectedTask = task;
         OnPropertyChanged(nameof(SelectedTask));
+    }
+
+    private void ReturnToProcessing()
+    {
+        // Deselect current task to trigger state change
+        _taskQueue.SelectedTask = null;
     }
 }
