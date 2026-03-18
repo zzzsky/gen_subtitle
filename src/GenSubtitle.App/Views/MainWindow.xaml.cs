@@ -37,13 +37,14 @@ public partial class MainWindow : Window
         };
         _timer.Tick += OnTick;
 
-        Player.MediaOpened += (_, _) =>
-        {
-            if (Player.NaturalDuration.HasTimeSpan)
-            {
-                TimelineSlider.Maximum = Player.NaturalDuration.TimeSpan.TotalSeconds;
-            }
-        };
+        // TODO: Video player moved to EditingView - remove old Player references
+        // Player.MediaOpened += (_, _) =>
+        // {
+        //     if (Player.NaturalDuration.HasTimeSpan)
+        //     {
+        //         TimelineSlider.Maximum = Player.NaturalDuration.TimeSpan.TotalSeconds;
+        //     }
+        // };
     }
 
     private void OnImportFiles(object sender, RoutedEventArgs e)
@@ -126,136 +127,91 @@ public partial class MainWindow : Window
 
     private void OnToggleQueue(object sender, RoutedEventArgs e)
     {
-        _queueVisible = !_queueVisible;
-        QueuePanel.Visibility = _queueVisible ? Visibility.Visible : Visibility.Collapsed;
-        QueueColumn.Width = _queueVisible ? new GridLength(300) : new GridLength(0);
-        QueueGapColumn.Width = _queueVisible ? new GridLength(12) : new GridLength(0);
+        // TODO: Old UI feature - UI panels removed in Phase 1
+        // _queueVisible = !_queueVisible;
+        // QueuePanel.Visibility = _queueVisible ? Visibility.Visible : Visibility.Collapsed;
+        // QueueColumn.Width = _queueVisible ? new GridLength(300) : new GridLength(0);
+        // QueueGapColumn.Width = _queueVisible ? new GridLength(12) : new GridLength(0);
     }
 
     private void OnTogglePreview(object sender, RoutedEventArgs e)
     {
-        _previewVisible = !_previewVisible;
-        PreviewPanel.Visibility = _previewVisible ? Visibility.Visible : Visibility.Collapsed;
-        PreviewColumn.Width = _previewVisible ? new GridLength(2, GridUnitType.Star) : new GridLength(0);
-        PreviewGapColumn.Width = _previewVisible ? new GridLength(12) : new GridLength(0);
+        // TODO: Old UI feature - UI panels removed in Phase 1
+        // _previewVisible = !_previewVisible;
+        // PreviewPanel.Visibility = _previewVisible ? Visibility.Visible : Visibility.Collapsed;
+        // PreviewColumn.Width = _previewVisible ? new GridLength(2, GridUnitType.Star) : new GridLength(0);
+        // PreviewGapColumn.Width = _previewVisible ? new GridLength(12) : new GridLength(0);
     }
 
     private void OnToggleCompact(object sender, RoutedEventArgs e)
     {
-        _queueVisible = !_queueVisible;
-        _previewVisible = !_previewVisible;
-        QueuePanel.Visibility = _queueVisible ? Visibility.Visible : Visibility.Collapsed;
-        PreviewPanel.Visibility = _previewVisible ? Visibility.Visible : Visibility.Collapsed;
-        QueueColumn.Width = _queueVisible ? new GridLength(300) : new GridLength(0);
-        QueueGapColumn.Width = _queueVisible ? new GridLength(12) : new GridLength(0);
-        PreviewColumn.Width = _previewVisible ? new GridLength(2, GridUnitType.Star) : new GridLength(0);
-        PreviewGapColumn.Width = _previewVisible ? new GridLength(12) : new GridLength(0);
+        // TODO: Old UI feature - UI panels removed in Phase 1
+        // _queueVisible = !_queueVisible;
+        // _previewVisible = !_previewVisible;
+        // QueuePanel.Visibility = _queueVisible ? Visibility.Visible : Visibility.Collapsed;
+        // PreviewPanel.Visibility = _previewVisible ? Visibility.Visible : Visibility.Collapsed;
+        // QueueColumn.Width = _queueVisible ? new GridLength(300) : new GridLength(0);
+        // QueueGapColumn.Width = _queueVisible ? new GridLength(12) : new GridLength(0);
+        // PreviewColumn.Width = _previewVisible ? new GridLength(2, GridUnitType.Star) : new GridLength(0);
+        // PreviewGapColumn.Width = _previewVisible ? new GridLength(12) : new GridLength(0);
     }
 
     private void OnTaskSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
-        if (_viewModel.SelectedTask is null)
-        {
-            return;
-        }
-
-        Player.Source = new Uri(_viewModel.SelectedTask.FilePath);
-        Player.Stop();
+        // TODO: Video player moved to EditingView
+        // if (_viewModel.SelectedTask is null) { return; }
+        // Player.Source = new Uri(_viewModel.SelectedTask.FilePath);
+        // Player.Stop();
     }
 
     private void OnPlay(object sender, RoutedEventArgs e)
     {
-        if (Player.Source is null)
-        {
-            return;
-        }
-        Player.Play();
-        _timer.Start();
-        _isPlaying = true;
+        // TODO: Video player moved to EditingView
     }
 
     private void OnPause(object sender, RoutedEventArgs e)
     {
-        Player.Pause();
-        _timer.Stop();
-        _isPlaying = false;
+        // TODO: Video player moved to EditingView
     }
 
     private void OnAlignStart(object sender, RoutedEventArgs e)
     {
-        _viewModel.AlignSelectedStart(Player.Position);
+        // TODO: Video player moved to EditingView
     }
 
     private void OnAlignEnd(object sender, RoutedEventArgs e)
     {
-        _viewModel.AlignSelectedEnd(Player.Position);
+        // TODO: Video player moved to EditingView
     }
 
     private void OnTimelineChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (Player.NaturalDuration.HasTimeSpan)
-        {
-            if (_isSeeking)
-            {
-                Player.Position = TimeSpan.FromSeconds(e.NewValue);
-            }
-            TimeDisplay.Text = $"{Player.Position:hh\\:mm\\:ss} / {Player.NaturalDuration.TimeSpan:hh\\:mm\\:ss}";
-        }
+        // TODO: Video player moved to EditingView
     }
 
     private void OnSeekStart(object sender, MouseButtonEventArgs e)
     {
-        _isSeeking = true;
-        _wasPlaying = _isPlaying;
-        e.Handled = true;
-        Player.Pause();
-        _timer.Stop();
-        SeekToMousePosition(e);
+        // TODO: Video player moved to EditingView
     }
 
     private void OnSeekMove(object sender, MouseEventArgs e)
     {
-        if (_isSeeking && e.LeftButton == MouseButtonState.Pressed)
-        {
-            SeekToMousePosition(e);
-        }
+        // TODO: Video player moved to EditingView
     }
 
     private void OnSeekEnd(object sender, MouseButtonEventArgs e)
     {
-        _isSeeking = false;
-        SeekToMousePosition(e);
-        e.Handled = true;
-        if (_wasPlaying)
-        {
-            Player.Play();
-            _timer.Start();
-            _isPlaying = true;
-        }
+        // TODO: Video player moved to EditingView
     }
 
     private void OnTick(object? sender, EventArgs e)
     {
-        if (Player.NaturalDuration.HasTimeSpan && !_isSeeking)
-        {
-            TimelineSlider.Value = Player.Position.TotalSeconds;
-            TimeDisplay.Text = $"{Player.Position:hh\\:mm\\:ss} / {Player.NaturalDuration.TimeSpan:hh\\:mm\\:ss}";
-        }
+        // TODO: Video player moved to EditingView
     }
 
     private void SeekToMousePosition(MouseEventArgs e)
     {
-        if (!Player.NaturalDuration.HasTimeSpan)
-        {
-            return;
-        }
-
-        var position = e.GetPosition(TimelineSlider);
-        var ratio = Math.Clamp(position.X / Math.Max(1, TimelineSlider.ActualWidth), 0, 1);
-        var targetSeconds = TimelineSlider.Minimum + (TimelineSlider.Maximum - TimelineSlider.Minimum) * ratio;
-        TimelineSlider.Value = targetSeconds;
-        Player.Position = TimeSpan.FromSeconds(targetSeconds);
-        Player.Pause();
+        // TODO: Video player moved to EditingView
     }
 
     private void OnTitleBarMouseDown(object sender, MouseButtonEventArgs e)

@@ -43,7 +43,7 @@ public class EditingViewModel : ObservableObject
     public void SetSelectedTask(TaskItemViewModel? task)
     {
         SelectedTask = task;
-        OnPropertyChanged(nameof(SelectedTask));
+        RaisePropertyChanged(nameof(SelectedTask));
     }
 
     private void OnTaskCollectionChanged()

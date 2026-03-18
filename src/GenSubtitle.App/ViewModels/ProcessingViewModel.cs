@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using GenSubtitle.App.Services;
+using CoreTaskStatus = GenSubtitle.Core.Models.TaskStatus;
 
 namespace GenSubtitle.App.ViewModels;
 
@@ -39,7 +40,7 @@ public class ProcessingViewModel : ObservableObject
 
     private bool CanEditSelectedTask()
     {
-        return SelectedTask?.Status == Core.Models.TaskStatus.Completed;
+        return SelectedTask?.Status == CoreTaskStatus.Completed;
     }
 
     private void EditSelectedTask()
