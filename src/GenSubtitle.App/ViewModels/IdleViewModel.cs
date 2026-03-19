@@ -22,7 +22,9 @@ public class IdleViewModel : ObservableObject
 
     public void ImportFiles(string[]? files)
     {
-        // TODO: Implement file import logic
-        // This will be connected to TaskQueueViewModel.EnqueueFiles
+        if (files != null && files.Length > 0)
+        {
+            _taskQueue.EnqueueFiles(files);
+        }
     }
 }

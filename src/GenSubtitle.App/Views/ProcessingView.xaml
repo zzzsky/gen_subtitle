@@ -8,67 +8,146 @@
              d:DataContext="{d:DesignInstance vm:ProcessingViewModel}"
              mc:Ignorable="d">
     <Grid>
-        <materialDesign:Card Margin="16" Padding="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="任务列表" FontSize="24" FontWeight="Bold" Margin="0,0,0,16"/>
+            <Button Grid.Column="1"
+                    Content="返回引导页"
+                    Command="{Binding ReturnToIdleCommand}"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Margin="12,0,0,0"/>
+        </Grid>
+
+        <!-- Search and Filter Panel -->
+        <materialDesign:Card Grid.Row="1" Margin="0,0,0,12" Padding="16">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                <Grid Grid.Row="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <!-- Search Box -->
+                <TextBox Grid.Column="0"
+                         materialDesign:HintAssist.Hint="搜索文件名..."
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         VerticalAlignment="Center"
+                         Margin="0,0,16,0"/>
 
-                    <TextBlock Grid.Column="0" Text="任务列表" FontSize="24" FontWeight="Bold" Margin="0,0,0,16"/>
-                    <Button Grid.Column="1"
-                            Content="返回引导页"
-                            Command="{Binding ReturnToIdleCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Margin="12,0,0,0"/>
-                </Grid>
+                <!-- Status Filter -->
+                <ComboBox Grid.Column="1"
+                          materialDesign:HintAssist.Hint="状态筛选"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Width="120"
+                          Margin="0,0,8,0">
+                    <ComboBoxItem Content="全部" Tag="All" IsSelected="True"/>
+                    <ComboBoxItem Content="已完成" Tag="Completed"/>
+                    <ComboBoxItem Content="处理中" Tag="Processing"/>
+                    <ComboBoxItem Content="失败" Tag="Failed"/>
+                    <ComboBoxItem Content="队列中" Tag="Queued"/>
+                </ComboBox>
 
-                <DataGrid Grid.Row="1"
-                          ItemsSource="{Binding Tasks}"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          CanUserDeleteRows="False"
-                          SelectionMode="Single"
-                          HeadersVisibility="Column"
-                          GridLinesVisibility="Horizontal"
-                          materialDesign:DataGridAssist.CellPadding="8"
-                          Style="{StaticResource MaterialDesignDataGrid}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="文件名" Binding="{Binding FileName}" Width="*" MinWidth="200"/>
-                        <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="100"/>
-                        <DataGridTemplateColumn Header="进度" Width="150">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Grid>
-                                        <ProgressBar Value="{Binding Progress}" Maximum="100" Height="16"/>
-                                        <TextBlock Text="{Binding ProgressText}" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="模型" Binding="{Binding Model}" Width="100"/>
-                        <DataGridTextColumn Header="语言" Binding="{Binding DetectedLanguage}" Width="80"/>
-                        <DataGridTemplateColumn Header="操作" Width="80">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="编辑"
-                                            Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                                            FontSize="11"
-                                            Padding="8,4"
-                                            IsEnabled="{Binding Status, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <!-- Date Filter -->
+                <ComboBox Grid.Column="2"
+                          materialDesign:HintAssist.Hint="日期筛选"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Width="120">
+                    <ComboBoxItem Content="全部" IsSelected="True"/>
+                    <ComboBoxItem Content="今天"/>
+                    <ComboBoxItem Content="本周"/>
+                    <ComboBoxItem Content="本月"/>
+                </ComboBox>
             </Grid>
         </materialDesign:Card>
+
+        <!-- Batch Operations Panel -->
+        <materialDesign:Card Grid.Row="2" Margin="0,0,0,12" Padding="16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Select All Checkbox -->
+                <CheckBox Grid.Column="0"
+                          Content="全选"
+                          IsChecked="{Binding SelectAllChecked}"
+                          Command="{Binding SelectAllCommand}"
+                          Margin="0,0,16,0"
+                          VerticalAlignment="Center"/>
+
+                <!-- Selected Count -->
+                <TextBlock Grid.Column="1"
+                           Text="{Binding SelectedTasksText}"
+                           Foreground="{DynamicResource MaterialDesignBodyLight}"
+                           VerticalAlignment="Center"
+                           FontSize="14"/>
+
+                <!-- Batch Action Buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="批量导出"
+                            Command="{Binding BatchExportCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Width="90"
+                            Margin="0,0,8,0"
+                            FontSize="12"/>
+                    <Button Content="批量删除"
+                            Command="{Binding BatchDeleteCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Width="90"
+                            Margin="0,0,8,0"
+                            FontSize="12"/>
+                    <Button Content="清空完成"
+                            Command="{Binding ClearCompletedCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Width="90"
+                            FontSize="12"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Task List -->
+        <DataGrid Grid.Row="3"
+                  ItemsSource="{Binding TasksView}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  materialDesign:DataGridAssist.CellPadding="8"
+                  Style="{StaticResource MaterialDesignDataGrid}">
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn Header="选择" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                <DataGridTextColumn Header="文件名" Binding="{Binding FileName}" Width="*" MinWidth="200"/>
+                <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="100"/>
+                <DataGridTemplateColumn Header="进度" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <ProgressBar Value="{Binding Progress}" Maximum="100" Height="16"/>
+                                <TextBlock Text="{Binding ProgressText}" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="模型" Binding="{Binding Model}" Width="100"/>
+                <DataGridTextColumn Header="语言" Binding="{Binding DetectedLanguage}" Width="80"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </UserControl>

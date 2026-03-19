@@ -22,6 +22,7 @@ public sealed class TaskItemViewModel : ObservableObject
     private string _translationEtaText = string.Empty;
     private DateTime? _translationStartUtc;
     private string _progressText = string.Empty;
+    private bool _isSelected;
 
     public TaskItemViewModel(TaskQueueViewModel queue, int id, string filePath)
     {
@@ -127,6 +128,12 @@ public sealed class TaskItemViewModel : ObservableObject
 
     internal CancellationTokenSource? CancellationTokenSource { get; set; }
     internal bool PauseRequested { get; set; }
+
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
 
     public RelayCommand PauseCommand { get; }
     public RelayCommand ResumeCommand { get; }

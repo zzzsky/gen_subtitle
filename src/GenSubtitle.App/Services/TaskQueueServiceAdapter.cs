@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using GenSubtitle.Core.Models;
 
 namespace GenSubtitle.App.Services;
 
@@ -29,7 +30,7 @@ public class TaskQueueServiceAdapter : ITaskQueueService
         return _queue.EnqueueFiles(files);
     }
 
-    public Task ExportTaskAsync(ViewModels.TaskItemViewModel task, Core.Models.ExportOptions options, Action<double>? onProgress = null, CancellationToken cancellationToken = default)
+    public Task ExportTaskAsync(ViewModels.TaskItemViewModel task, ExportOptions options, Action<double>? onProgress = null, CancellationToken cancellationToken = default)
     {
         return _queue.ExportTaskAsync(task, options, onProgress, cancellationToken);
     }
