@@ -19,6 +19,7 @@ public sealed class TaskQueueViewModel : ObservableObject
     private readonly JobPipelineService _pipelineService;
     private readonly TaskCacheService _cacheService = new();
     private readonly Dispatcher _dispatcher;
+    private NotificationService? _notificationService;
     private AppSettings _settings;
     private SemaphoreSlim _semaphore;
     private TaskItemViewModel? _selectedTask;
@@ -34,6 +35,14 @@ public sealed class TaskQueueViewModel : ObservableObject
         _semaphore = new SemaphoreSlim(Math.Max(1, _settings.MaxConcurrency));
         Tasks = new ObservableCollection<TaskItemViewModel>();
         UpdateSummary();
+    }
+
+    /// <summary>
+    /// Set the main window for notifications
+    /// </summary>
+    public void SetMainWindow(Window mainWindow)
+    {
+        _notificationService = new NotificationService(mainWindow);
     }
 
     public ObservableCollection<TaskItemViewModel> Tasks { get; }
@@ -266,6 +275,7 @@ public sealed class TaskQueueViewModel : ObservableObject
             task.UpdateProgress(100);
             task.UpdateStatus(CoreTaskStatus.Completed);
             Log($"Completed: {task.FileName}");
+            CheckAllTasksCompleted();
         }
         catch (OperationCanceledException)
         {
@@ -509,5 +519,20 @@ public sealed class TaskQueueViewModel : ObservableObject
     private static string NormalizeLang(string value)
     {
         return value.Replace('-', '_').ToLowerInvariant();
+    }
+
+    private void CheckAllTasksCompleted()
+    {
+        var completedCount = Tasks.Count(t => t.Status == CoreTaskStatus.Completed);
+        var totalCount = Tasks.Count;
+
+        // Only notify if all tasks are completed and there's at least one task
+        if (totalCount > 0 && completedCount == totalCount)
+        {
+            var failedCount = Tasks.Count(t => t.Status == CoreTaskStatus.Failed);
+            var successfulCount = completedCount - failedCount;
+
+            _notificationService?.ShowTaskCompletionNotification(totalCount, successfulCount, failedCount);
+        }
     }
 }

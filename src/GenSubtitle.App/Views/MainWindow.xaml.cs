@@ -31,6 +31,9 @@ public partial class MainWindow : Window
         _viewModel = new MainViewModel();
         DataContext = _viewModel;
 
+        // Initialize notification service with main window
+        _viewModel.Queue.SetMainWindow(this);
+
         _timer = new DispatcherTimer
         {
             Interval = TimeSpan.FromMilliseconds(200)
