@@ -36,11 +36,19 @@ public class ProcessingViewModel : ObservableObject
         _tasksView = new CollectionViewSource { Source = _taskQueue.Tasks }.View;
         _tasksView.Filter = FilterTasks;
 
-        // Subscribe to collection changes to update selected count
+        // Subscribe to collection changes to update selected count and statistics
         _taskQueue.Tasks.CollectionChanged += (s, e) =>
         {
             RaisePropertyChanged(nameof(SelectedTasksCount));
             RaisePropertyChanged(nameof(SelectedTasksText));
+            RaisePropertyChanged(nameof(TotalCount));
+            RaisePropertyChanged(nameof(CompletedCount));
+            RaisePropertyChanged(nameof(FailedCount));
+            RaisePropertyChanged(nameof(ProcessingCount));
+            RaisePropertyChanged(nameof(QueuedCount));
+            RaisePropertyChanged(nameof(SuccessRate));
+            RaisePropertyChanged(nameof(FailureRate));
+            RaisePropertyChanged(nameof(StatisticsSummary));
             _tasksView?.Refresh();
         };
     }
@@ -116,6 +124,23 @@ public class ProcessingViewModel : ObservableObject
             }
         }
     }
+
+    // Statistics properties
+    public int TotalCount => Tasks.Count;
+    public int CompletedCount => Tasks.Count(t => t.Status == CoreTaskStatus.Completed);
+    public int FailedCount => Tasks.Count(t => t.Status == CoreTaskStatus.Failed);
+    public int ProcessingCount => Tasks.Count(t => t.Status == CoreTaskStatus.Transcribing || t.Status == CoreTaskStatus.Translating);
+    public int QueuedCount => Tasks.Count(t => t.Status == CoreTaskStatus.Queued);
+
+    public string SuccessRate => TotalCount > 0
+        ? $"{(CompletedCount * 100 / TotalCount)}%"
+        : "0%";
+
+    public string FailureRate => TotalCount > 0
+        ? $"{(FailedCount * 100 / TotalCount)}%"
+        : "0%";
+
+    public string StatisticsSummary => $"总数: {TotalCount} | 已完成: {CompletedCount} | 处理中: {ProcessingCount} | 队列中: {QueuedCount} | 失败: {FailedCount}";
 
     public RelayCommand EditCommand { get; }
     public RelayCommand ReturnToIdleCommand { get; }

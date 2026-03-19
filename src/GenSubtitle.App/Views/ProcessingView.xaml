@@ -12,6 +12,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -120,8 +121,44 @@
             </Grid>
         </materialDesign:Card>
 
+        <!-- Statistics Panel -->
+        <materialDesign:Card Grid.Row="3" Margin="0,0,0,12" Padding="16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Total Count -->
+                <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                    <TextBlock Text="📊 总任务数" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    <TextBlock Text="{Binding TotalCount}" FontSize="24" FontWeight="Bold" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <!-- Completed -->
+                <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                    <TextBlock Text="✅ 成功率" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    <TextBlock Text="{Binding SuccessRate}" FontSize="24" FontWeight="Bold" Margin="0,4,0,0" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                </StackPanel>
+
+                <!-- Processing -->
+                <StackPanel Grid.Column="2" Margin="0,0,16,0">
+                    <TextBlock Text="⏳ 处理中" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    <TextBlock Text="{Binding ProcessingCount}" FontSize="24" FontWeight="Bold" Margin="0,4,0,0" Foreground="{DynamicResource SecondaryHueMidBrush}"/>
+                </StackPanel>
+
+                <!-- Failed -->
+                <StackPanel Grid.Column="3">
+                    <TextBlock Text="❌ 失败率" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    <TextBlock Text="{Binding FailureRate}" FontSize="24" FontWeight="Bold" Margin="0,4,0,0" Foreground="{DynamicResource ValidationErrorBrush}"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
         <!-- Task List -->
-        <DataGrid Grid.Row="3"
+        <DataGrid Grid.Row="4"
                   ItemsSource="{Binding TasksView}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
