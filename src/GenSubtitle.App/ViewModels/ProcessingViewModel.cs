@@ -33,6 +33,9 @@ public class ProcessingViewModel : ObservableObject
         ClearCompletedCommand = new RelayCommand(ClearCompleted, CanClearCompleted);
         DeleteSelectedCommand = new RelayCommand(DeleteSelected, CanDeleteSelected);
         ClearSelectionCommand = new RelayCommand(ClearSelection, CanClearSelection);
+        BatchTimeAdjustCommand = new RelayCommand(BatchTimeAdjust, CanBatchTimeAdjust);
+        MergeOverlappingCommand = new RelayCommand(MergeOverlapping, CanMergeOverlapping);
+        SplitLongCommand = new RelayCommand(SplitLong, CanSplitLong);
 
         // Setup filtered view
         _tasksView = new CollectionViewSource { Source = _taskQueue.Tasks }.View;
@@ -152,6 +155,9 @@ public class ProcessingViewModel : ObservableObject
     public RelayCommand ClearCompletedCommand { get; }
     public RelayCommand DeleteSelectedCommand { get; }
     public RelayCommand ClearSelectionCommand { get; }
+    public RelayCommand BatchTimeAdjustCommand { get; }
+    public RelayCommand MergeOverlappingCommand { get; }
+    public RelayCommand SplitLongCommand { get; }
 
     private bool CanEditSelectedTask()
     {
@@ -320,5 +326,54 @@ public class ProcessingViewModel : ObservableObject
         }
 
         return true;
+    }
+
+    private bool CanBatchTimeAdjust()
+    {
+        return SelectedTasksCount > 0;
+    }
+
+    private async void BatchTimeAdjust()
+    {
+        // TODO: Show TimeAdjustDialog and apply adjustments
+        // For now, this is a placeholder
+        // In a full implementation, this would:
+        // 1. Show the dialog to get adjustment mode and value
+        // 2. Apply time offset or scaling to selected tasks' subtitles
+        // 3. Save the modified subtitles
+    }
+
+    private bool CanMergeOverlapping()
+    {
+        return SelectedTask?.Status == CoreTaskStatus.Completed;
+    }
+
+    private void MergeOverlapping()
+    {
+        if (SelectedTask == null) return;
+
+        // TODO: Implement merge overlapping algorithm
+        // For now, this is a placeholder
+        // In a full implementation, this would:
+        // 1. Find segments with overlapping time ranges
+        // 2. Merge them into single segments
+        // 3. Update the Segments collection
+    }
+
+    private bool CanSplitLong()
+    {
+        return SelectedTask?.Status == CoreTaskStatus.Completed;
+    }
+
+    private void SplitLong()
+    {
+        if (SelectedTask == null) return;
+
+        // TODO: Implement split long sentences feature
+        // For now, this is a placeholder
+        // In a full implementation, this would:
+        // 1. Find segments longer than a threshold (e.g., 10 seconds)
+        // 2. Split them at appropriate break points (punctuation, pauses)
+        // 3. Update the Segments collection
     }
 }

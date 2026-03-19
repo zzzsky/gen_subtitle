@@ -18,6 +18,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -162,8 +163,34 @@
             </Grid>
         </materialDesign:Card>
 
+        <!-- Time Adjustment Panel -->
+        <materialDesign:Card Grid.Row="4" Margin="0,0,0,12" Padding="16">
+            <StackPanel>
+                <TextBlock Text="⏱️ 批量时间调整" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Content="时间偏移/缩放"
+                            Command="{Binding BatchTimeAdjustCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Width="110"
+                            Margin="0,0,8,0"
+                            FontSize="12"/>
+                    <Button Content="合并重复字幕"
+                            Command="{Binding MergeOverlappingCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Width="110"
+                            Margin="0,0,8,0"
+                            FontSize="12"/>
+                    <Button Content="拆分长句"
+                            Command="{Binding SplitLongCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Width="110"
+                            FontSize="12"/>
+                </StackPanel>
+            </StackPanel>
+        </materialDesign:Card>
+
         <!-- Task List -->
-        <DataGrid Grid.Row="4"
+        <DataGrid Grid.Row="5"
                   ItemsSource="{Binding TasksView}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
