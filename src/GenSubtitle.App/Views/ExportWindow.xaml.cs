@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using GenSubtitle.Core.Models;
 
 namespace GenSubtitle.App.Views;
@@ -11,6 +12,16 @@ public partial class ExportWindow : Window
     {
         InitializeComponent();
         _options = options;
+
+        // Set format selection
+        foreach (ComboBoxItem item in FormatBox.Items)
+        {
+            if (item.Tag?.ToString() == options.Format.ToString())
+            {
+                FormatBox.SelectedItem = item;
+                break;
+            }
+        }
 
         if (options.SoftMux || (!options.BurnIn && !options.SoftMux))
         {
@@ -27,6 +38,15 @@ public partial class ExportWindow : Window
 
     private void OnSave(object sender, RoutedEventArgs e)
     {
+        // Save format selection
+        if (FormatBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
+        {
+            if (Enum.TryParse<ExportFormat>(selectedItem.Tag.ToString(), out var format))
+            {
+                _options.Format = format;
+            }
+        }
+
         _options.BurnIn = BurnInRadio.IsChecked == true;
         _options.SoftMux = SoftMuxRadio.IsChecked == true;
         _options.AssStyleName = StyleBox.Text.Trim();

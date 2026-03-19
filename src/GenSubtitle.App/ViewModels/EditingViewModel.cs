@@ -1,8 +1,11 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Windows.Input;
 using GenSubtitle.App.Services;
 using GenSubtitle.Core.Models;
+using GenSubtitle.Core.Services;
 
 namespace GenSubtitle.App.ViewModels;
 
@@ -156,11 +159,47 @@ public class EditingViewModel : ObservableObject
     {
         if (SelectedTask?.SelectedSegment is null) return;
 
-        // TODO: Implement re-translation for selected segment
-        // In a full implementation, this would:
-        // 1. Call translation service for the selected segment
-        // 2. Update the segment's ZhText
-        // 3. Save to translation memory
+        try
+        {
+            // Get settings for API configuration
+            var settingsService = new SettingsService();
+            var settings = settingsService.Load();
+
+            if (string.IsNullOrWhiteSpace(settings.QwenApiKey))
+            {
+                System.Windows.MessageBox.Show(
+                    "请先配置 Qwen API 密钥",
+                    "翻译失败",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
+            using var httpClient = new HttpClient();
+            const string qwenBeijingBaseUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1";
+            var translationService = new QwenTranslationService(httpClient, settings.QwenApiKey, qwenBeijingBaseUrl, settings.QwenModel);
+
+            // Translate only the selected segment
+            var segment = SelectedTask.SelectedSegment;
+            var texts = new[] { segment.SourceText };
+            var translations = await translationService.TranslateAsync(texts, "auto", "zh");
+
+            if (translations.Count > 0)
+            {
+                segment.ZhText = translations[0];
+
+                // Trigger auto-save
+                _autoSaveService.RequestAutoSave(SelectedTask);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"翻译失败: {ex.Message}",
+                "错误",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
     }
 
     private bool CanReTranslateAll()
@@ -172,22 +211,86 @@ public class EditingViewModel : ObservableObject
     {
         if (SelectedTask == null) return;
 
-        // TODO: Implement re-translation for all segments
-        // In a full implementation, this would:
-        // 1. Call translation service for all segments
-        // 2. Update each segment's ZhText
-        // 3. Show progress dialog
-        // 4. Save translation memory
+        try
+        {
+            // Get settings for API configuration
+            var settingsService = new SettingsService();
+            var settings = settingsService.Load();
+
+            if (string.IsNullOrWhiteSpace(settings.QwenApiKey))
+            {
+                System.Windows.MessageBox.Show(
+                    "请先配置 Qwen API 密钥",
+                    "翻译失败",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
+            using var httpClient = new HttpClient();
+            const string qwenBeijingBaseUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1";
+            var translationService = new QwenTranslationService(httpClient, settings.QwenApiKey, qwenBeijingBaseUrl, settings.QwenModel);
+
+            // Translate all segments in batches
+            var segments = SelectedTask.Segments.ToList();
+            var batchSize = 20;
+
+            for (int i = 0; i < segments.Count; i += batchSize)
+            {
+                var batch = segments.Skip(i).Take(batchSize).ToList();
+                var texts = batch.Select(s => s.SourceText).ToList();
+
+                var translations = await translationService.TranslateAsync(texts, "auto", "zh");
+
+                // Update ViewModels with new translations
+                for (int j = 0; j < translations.Count && j < batch.Count; j++)
+                {
+                    batch[j].ZhText = translations[j];
+                }
+            }
+
+            // Trigger auto-save
+            _autoSaveService.RequestAutoSave(SelectedTask);
+
+            System.Windows.MessageBox.Show(
+                $"已完成重新翻译 {segments.Count} 条字幕",
+                "翻译完成",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"翻译失败: {ex.Message}",
+                "错误",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
     }
 
     private void OpenStyleEditor()
     {
-        // TODO: Show StyleEditorWindow
-        // For now, this is a placeholder
-        // In a full implementation, this would:
-        // 1. Create and show StyleEditorWindow
-        // 2. Get the style settings from user
-        // 3. Apply the style to subtitles (for ASS format)
-        // 4. Save style preferences
+        var dialog = new Views.StyleEditorWindow
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+
+        var result = dialog.ShowDialog();
+        if (result == true)
+        {
+            // User clicked Apply - style settings are available in dialog properties
+            // For now, we could:
+            // 1. Save these as default style preferences
+            // 2. Apply to current task's export options
+            // 3. Update the preview subtitle styling
+
+            // TODO: Integrate with settings service to persist style preferences
+            // For now, just show confirmation
+            System.Windows.MessageBox.Show(
+                $"样式设置已应用:\n字体: {dialog.FontFamily}\n大小: {dialog.FontSize}\n颜色: {dialog.FontColor}\n位置: {dialog.Position}",
+                "样式编辑器",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
     }
 }

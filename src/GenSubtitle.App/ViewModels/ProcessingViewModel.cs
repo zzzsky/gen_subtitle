@@ -335,12 +335,59 @@ public class ProcessingViewModel : ObservableObject
 
     private async void BatchTimeAdjust()
     {
-        // TODO: Show TimeAdjustDialog and apply adjustments
-        // For now, this is a placeholder
-        // In a full implementation, this would:
-        // 1. Show the dialog to get adjustment mode and value
-        // 2. Apply time offset or scaling to selected tasks' subtitles
-        // 3. Save the modified subtitles
+        var selectedTasks = Tasks.Where(t => t.IsSelected && t.Status == CoreTaskStatus.Completed).ToList();
+        if (selectedTasks.Count == 0)
+        {
+            return;
+        }
+
+        // Show dialog
+        var dialog = new Views.TimeAdjustDialog();
+        var result = dialog.ShowDialog();
+
+        if (result != true)
+        {
+            return; // User cancelled
+        }
+
+        var mode = dialog.Mode;
+        var value = dialog.Value;
+
+        // Apply time adjustment to each selected task
+        foreach (var task in selectedTasks)
+        {
+            ApplyTimeAdjustment(task, mode, value);
+        }
+    }
+
+    private void ApplyTimeAdjustment(TaskItemViewModel task, string mode, double value)
+    {
+        foreach (var segment in task.Segments)
+        {
+            if (mode == "Offset")
+            {
+                // Apply time offset (in seconds)
+                segment.Start = TimeSpan.FromSeconds(segment.Start.TotalSeconds + value);
+                segment.End = TimeSpan.FromSeconds(segment.End.TotalSeconds + value);
+
+                // Ensure times don't go negative
+                if (segment.Start < TimeSpan.Zero)
+                {
+                    var offset = -segment.Start.TotalSeconds;
+                    segment.Start = TimeSpan.Zero;
+                    segment.End = TimeSpan.FromSeconds(segment.End.TotalSeconds + offset);
+                }
+            }
+            else if (mode == "Scale")
+            {
+                // Apply proportional scaling
+                var scaleFactor = 1.0 + (value / 100.0); // value is percentage
+                var duration = segment.End - segment.Start;
+                var newDuration = TimeSpan.FromSeconds(duration.TotalSeconds * scaleFactor);
+
+                segment.End = segment.Start + newDuration;
+            }
+        }
     }
 
     private bool CanMergeOverlapping()
