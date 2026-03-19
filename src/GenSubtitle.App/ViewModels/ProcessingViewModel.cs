@@ -399,12 +399,52 @@ public class ProcessingViewModel : ObservableObject
     {
         if (SelectedTask == null) return;
 
-        // TODO: Implement merge overlapping algorithm
-        // For now, this is a placeholder
-        // In a full implementation, this would:
-        // 1. Find segments with overlapping time ranges
-        // 2. Merge them into single segments
-        // 3. Update the Segments collection
+        var segments = SelectedTask.Segments.OrderBy(s => s.Start).ToList();
+        if (segments.Count < 2) return;
+
+        var merged = new List<ViewModels.SubtitleSegmentViewModel>();
+        var current = segments[0];
+
+        for (int i = 1; i < segments.Count; i++)
+        {
+            var next = segments[i];
+
+            // Check if segments overlap (with 0.5 second tolerance)
+            if (next.Start < current.End.Add(TimeSpan.FromSeconds(0.5)))
+            {
+                // Merge: combine text and extend end time
+                var mergedSourceText = $"{current.SourceText} {next.SourceText}";
+                var mergedZhText = $"{current.ZhText} {next.ZhText}";
+
+                // Create a new merged segment
+                // We need to create it using the underlying model and wrap it in a ViewModel
+                var mergedSegment = new ViewModels.SubtitleSegmentViewModel(new SubtitleSegment
+                {
+                    Start = current.Start,
+                    End = next.End > current.End ? next.End : current.End,
+                    SourceText = mergedSourceText.Trim(),
+                    ZhText = mergedZhText.Trim()
+                });
+
+                current = mergedSegment;
+            }
+            else
+            {
+                // No overlap, add current and move to next
+                merged.Add(current);
+                current = next;
+            }
+        }
+
+        // Add the last segment
+        merged.Add(current);
+
+        // Update the collection
+        SelectedTask.Segments.Clear();
+        foreach (var segment in merged)
+        {
+            SelectedTask.Segments.Add(segment);
+        }
     }
 
     private bool CanSplitLong()
@@ -416,11 +456,114 @@ public class ProcessingViewModel : ObservableObject
     {
         if (SelectedTask == null) return;
 
-        // TODO: Implement split long sentences feature
-        // For now, this is a placeholder
-        // In a full implementation, this would:
-        // 1. Find segments longer than a threshold (e.g., 10 seconds)
-        // 2. Split them at appropriate break points (punctuation, pauses)
-        // 3. Update the Segments collection
+        const double maxDurationSeconds = 10.0; // Maximum segment duration in seconds
+        var segmentsToReplace = new List<(ViewModels.SubtitleSegmentViewModel original, List<ViewModels.SubtitleSegmentViewModel> replacements)>();
+
+        foreach (var segment in SelectedTask.Segments)
+        {
+            var duration = (segment.End - segment.Start).TotalSeconds;
+
+            if (duration > maxDurationSeconds)
+            {
+                // Find split points in source text (sentences)
+                var sourceSentences = SplitIntoSentences(segment.SourceText);
+                var zhSentences = SplitIntoSentences(segment.ZhText);
+
+                // If we can split into multiple parts
+                if (sourceSentences.Count > 1)
+                {
+                    var replacements = new List<ViewModels.SubtitleSegmentViewModel>();
+                    var timePerPart = duration / sourceSentences.Count;
+                    var currentTime = segment.Start;
+
+                    for (int i = 0; i < sourceSentences.Count; i++)
+                    {
+                        var partStart = currentTime;
+                        var partEnd = currentTime.Add(TimeSpan.FromSeconds(timePerPart));
+
+                        // Last part takes any remaining time
+                        if (i == sourceSentences.Count - 1)
+                        {
+                            partEnd = segment.End;
+                        }
+
+                        var newSegment = new ViewModels.SubtitleSegmentViewModel(new SubtitleSegment
+                        {
+                            Start = partStart,
+                            End = partEnd,
+                            SourceText = sourceSentences[i].Trim(),
+                            ZhText = i < zhSentences.Count ? zhSentences[i].Trim() : segment.ZhText
+                        });
+
+                        replacements.Add(newSegment);
+                        currentTime = partEnd;
+                    }
+
+                    segmentsToReplace.Add((segment, replacements));
+                }
+            }
+        }
+
+        // Apply replacements
+        if (segmentsToReplace.Count > 0)
+        {
+            var newSegments = new List<ViewModels.SubtitleSegmentViewModel>();
+
+            foreach (var segment in SelectedTask.Segments)
+            {
+                var replacement = segmentsToReplace.FirstOrDefault(r => r.original == segment);
+                if (replacement.original != null)
+                {
+                    newSegments.AddRange(replacement.replacements);
+                }
+                else
+                {
+                    newSegments.Add(segment);
+                }
+            }
+
+            // Update the collection
+            SelectedTask.Segments.Clear();
+            foreach (var segment in newSegments)
+            {
+                SelectedTask.Segments.Add(segment);
+            }
+        }
+    }
+
+    private List<string> SplitIntoSentences(string text)
+    {
+        var sentences = new List<string>();
+        var current = new System.Text.StringBuilder();
+
+        for (int i = 0; i < text.Length; i++)
+        {
+            current.Append(text[i]);
+
+            // Check for sentence-ending punctuation
+            if (text[i] == '。'|| text[i] == '！' || text[i] == '？' ||
+                text[i] == '.' || text[i] == '!' || text[i] == '?')
+            {
+                sentences.Add(current.ToString());
+                current.Clear();
+            }
+            else if (text[i] == '\n' || text[i] == '\r')
+            {
+                // Treat line breaks as sentence boundaries
+                if (current.Length > 0)
+                {
+                    sentences.Add(current.ToString().Trim());
+                    current.Clear();
+                }
+            }
+        }
+
+        // Add any remaining text
+        if (current.Length > 0)
+        {
+            sentences.Add(current.ToString());
+        }
+
+        return sentences.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
     }
 }
