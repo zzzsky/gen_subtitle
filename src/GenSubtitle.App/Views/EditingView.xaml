@@ -7,6 +7,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DataContext="{d:DesignInstance vm:EditingViewModel}"
              mc:Ignorable="d">
+    <UserControl.InputBindings>
+        <KeyBinding Key="Space" Command="{Binding PlayPauseCommand}"/>
+        <KeyBinding Key="Left" Command="{Binding NudgeBackwardCommand}"/>
+        <KeyBinding Key="Right" Command="{Binding NudgeForwardCommand}"/>
+        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}"/>
+    </UserControl.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>          <!-- Video player -->

@@ -40,6 +40,8 @@ public partial class EditingView : UserControl
             if (DataContext is ViewModels.EditingViewModel vm)
             {
                 vm.LoadVideoRequested += OnLoadVideoRequested;
+                vm.PlayPauseRequested += OnPlayPauseRequested;
+                vm.NudgeRequested += OnNudgeRequested;
                 // Load initial video if path exists
                 if (vm.CurrentVideoPath is not null)
                 {
@@ -53,6 +55,8 @@ public partial class EditingView : UserControl
             if (DataContext is ViewModels.EditingViewModel vm)
             {
                 vm.LoadVideoRequested -= OnLoadVideoRequested;
+                vm.PlayPauseRequested -= OnPlayPauseRequested;
+                vm.NudgeRequested -= OnNudgeRequested;
             }
         };
 
@@ -61,10 +65,14 @@ public partial class EditingView : UserControl
             if (e.OldValue is ViewModels.EditingViewModel oldVm)
             {
                 oldVm.LoadVideoRequested -= OnLoadVideoRequested;
+                oldVm.PlayPauseRequested -= OnPlayPauseRequested;
+                oldVm.NudgeRequested -= OnNudgeRequested;
             }
             if (e.NewValue is ViewModels.EditingViewModel newVm)
             {
                 newVm.LoadVideoRequested += OnLoadVideoRequested;
+                newVm.PlayPauseRequested += OnPlayPauseRequested;
+                newVm.NudgeRequested += OnNudgeRequested;
                 if (newVm.CurrentVideoPath is not null)
                 {
                     OnLoadVideoRequested(newVm, newVm.CurrentVideoPath);
@@ -79,6 +87,30 @@ public partial class EditingView : UserControl
         {
             Player.Source = new Uri(videoPath);
             Player.Position = TimeSpan.Zero;
+        }
+    }
+
+    private void OnPlayPauseRequested(object? sender, EventArgs e)
+    {
+        if (Player.IsLoaded && Player.CanPause)
+        {
+            Player.Pause();
+        }
+        else
+        {
+            Player.Play();
+        }
+    }
+
+    private void OnNudgeRequested(object? sender, TimeSpan offset)
+    {
+        if (Player.NaturalDuration.HasTimeSpan)
+        {
+            var newPosition = Player.Position + offset;
+            if (newPosition >= TimeSpan.Zero && newPosition <= Player.NaturalDuration.TimeSpan)
+            {
+                Player.Position = newPosition;
+            }
         }
     }
 

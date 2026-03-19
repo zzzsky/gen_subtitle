@@ -31,6 +31,8 @@ public class ProcessingViewModel : ObservableObject
         BatchExportCommand = new RelayCommand(BatchExport, CanBatchExport);
         BatchDeleteCommand = new RelayCommand(BatchDelete, CanBatchDelete);
         ClearCompletedCommand = new RelayCommand(ClearCompleted, CanClearCompleted);
+        DeleteSelectedCommand = new RelayCommand(DeleteSelected, CanDeleteSelected);
+        ClearSelectionCommand = new RelayCommand(ClearSelection, CanClearSelection);
 
         // Setup filtered view
         _tasksView = new CollectionViewSource { Source = _taskQueue.Tasks }.View;
@@ -148,6 +150,8 @@ public class ProcessingViewModel : ObservableObject
     public RelayCommand BatchExportCommand { get; }
     public RelayCommand BatchDeleteCommand { get; }
     public RelayCommand ClearCompletedCommand { get; }
+    public RelayCommand DeleteSelectedCommand { get; }
+    public RelayCommand ClearSelectionCommand { get; }
 
     private bool CanEditSelectedTask()
     {
@@ -243,6 +247,36 @@ public class ProcessingViewModel : ObservableObject
         {
             _taskQueue.DeleteTask(task, true, true);
         }
+    }
+
+    private bool CanDeleteSelected()
+    {
+        return SelectedTask != null;
+    }
+
+    private void DeleteSelected()
+    {
+        if (SelectedTask != null)
+        {
+            _taskQueue.DeleteTask(SelectedTask, true, true);
+            SelectedTask = null;
+        }
+    }
+
+    private bool CanClearSelection()
+    {
+        return SelectAllChecked || SelectedTasksCount > 0;
+    }
+
+    private void ClearSelection()
+    {
+        foreach (var task in Tasks)
+        {
+            task.IsSelected = false;
+        }
+        SelectAllChecked = false;
+        RaisePropertyChanged(nameof(SelectedTasksCount));
+        RaisePropertyChanged(nameof(SelectedTasksText));
     }
 
     private bool FilterTasks(object obj)

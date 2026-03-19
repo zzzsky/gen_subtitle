@@ -5,7 +5,18 @@
       "Bash(dotnet build:*)",
       "Bash(dotnet run:*)",
       "Bash(dotnet clean:*)",
-      "Bash(dotnet restore:*)"
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(sed -i 's/Player\\\\./\\\\/\\\\/ Player./g' MainWindow.xaml.cs)",
+      "Bash(sed -i 's/TimelineSlider\\\\./\\\\/\\\\/ TimelineSlider./g' MainWindow.xaml.cs)",
+      "Bash(sed -i 's/TimeDisplay\\\\./\\\\/\\\\/ TimeDisplay./g' MainWindow.xaml.cs)",
+      "Bash(sed -i '127s/^/\\\\/\\\\/ /' MainWindow.xaml.cs)",
+      "Bash(sed -i '128s/^/\\\\/\\\\/ /' MainWindow.xaml.cs)",
+      "Bash(sed -i '129s/^/\\\\/\\\\/ /' MainWindow.xaml.cs)",
+      "Bash(sed -i '130s/^/\\\\/\\\\/ /' MainWindow.xaml.cs)",
+      "Bash(sed -i '131s/^/\\\\/\\\\/ /' MainWindow.xaml.cs)"
     ]
   }
 }

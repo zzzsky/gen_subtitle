@@ -11,6 +11,9 @@
              DragEnter="OnDragEnter"
              DragLeave="OnDragLeave"
              Drop="OnDrop">
+    <UserControl.InputBindings>
+        <KeyBinding Key="O" Modifiers="Control" Command="{Binding ImportFilesCommand}"/>
+    </UserControl.InputBindings>
     <Grid>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
             <materialDesign:PackIcon Kind="Subtitles" Width="120" Height="120" Foreground="{DynamicResource MaterialDesignPrimaryHueMidBrush}" Margin="0,0,0,32"/>
