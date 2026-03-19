@@ -125,8 +125,43 @@ public class EditingViewModel : ObservableObject
         // Manual save - clear auto-save after saving
         if (SelectedTask != null)
         {
-            _autoSaveService.ClearAutoSave(SelectedTask);
-            // TODO: Implement actual save to SRT file
+            try
+            {
+                // Get the output directory (same as the video file location)
+                var videoDir = Path.GetDirectoryName(SelectedTask.FilePath);
+                if (string.IsNullOrEmpty(videoDir))
+                {
+                    videoDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                }
+
+                var baseName = Path.GetFileNameWithoutExtension(SelectedTask.FilePath);
+                var srtPath = Path.Combine(videoDir, baseName + ".srt");
+
+                // Convert ViewModels to model segments
+                var segments = SelectedTask.Segments
+                    .Select(vm => vm.ToModel())
+                    .ToList();
+
+                // Write bilingual SRT file
+                GenSubtitle.Core.Services.BilingualSubtitleIO.WriteBilingualSrt(srtPath, segments);
+
+                // Clear auto-save after successful save
+                _autoSaveService.ClearAutoSave(SelectedTask);
+
+                System.Windows.MessageBox.Show(
+                    $"字幕已保存到:\n{srtPath}",
+                    "保存成功",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"保存失败: {ex.Message}",
+                    "错误",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
         }
     }
 

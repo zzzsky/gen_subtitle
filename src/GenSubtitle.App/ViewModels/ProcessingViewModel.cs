@@ -215,12 +215,67 @@ public class ProcessingViewModel : ObservableObject
             return;
         }
 
-        // TODO: Implement batch export with progress dialog
-        foreach (var task in selectedTasks)
+        // Show progress dialog for batch export
+        var progressWindow = new Views.ExportProgressWindow(
+            new Views.ExportProgressViewModel(
+                $"批量导出 {selectedTasks.Count} 个任务",
+                string.Empty))
         {
-            // For now, just export with default options
-            var options = new ExportOptions();
-            await _taskQueue.ExportTaskAsync(task, options);
+            Title = "批量导出",
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        progressWindow.Show();
+
+        try
+        {
+            for (int i = 0; i < selectedTasks.Count; i++)
+            {
+                var task = selectedTasks[i];
+
+                // Export with default options (user can customize this in the future)
+                var options = new ExportOptions
+                {
+                    Format = ExportFormat.Srt, // Default format
+                    SoftMux = true
+                };
+
+                await _taskQueue.ExportTaskAsync(task, options);
+
+                // Update progress
+                var percent = (i + 1) * 100.0 / selectedTasks.Count;
+                progressWindow.DataContext = new Views.ExportProgressViewModel(
+                    task.FileName,
+                    string.Empty)
+                {
+                    Progress = percent
+                };
+            }
+
+            progressWindow.DataContext = new Views.ExportProgressViewModel(
+                "完成",
+                string.Empty)
+            {
+                Progress = 100,
+                IsCompleted = true
+            };
+
+            System.Windows.MessageBox.Show(
+                $"成功导出 {selectedTasks.Count} 个任务",
+                "批量导出完成",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+        catch (System.Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"批量导出失败: {ex.Message}",
+                "错误",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
+        finally
+        {
+            progressWindow.Close();
         }
     }
 
