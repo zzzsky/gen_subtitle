@@ -44,6 +44,76 @@ public static class SubtitleExporter
         return sb.ToString();
     }
 
+    public static string ExportVtt(IEnumerable<SubtitleSegment> segments)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("WEBVTT");
+        sb.AppendLine();
+
+        foreach (var segment in segments)
+        {
+            sb.AppendLine($"{FormatVttTime(segment.Start)} --> {FormatVttTime(segment.End)}");
+
+            if (string.IsNullOrWhiteSpace(segment.ZhText))
+            {
+                sb.AppendLine(segment.SourceText);
+            }
+            else
+            {
+                sb.AppendLine($"{segment.SourceText}");
+                sb.AppendLine($"{segment.ZhText}");
+            }
+            sb.AppendLine();
+        }
+
+        return sb.ToString();
+    }
+
+    public static string ExportTxt(IEnumerable<SubtitleSegment> segments)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var segment in segments)
+        {
+            if (string.IsNullOrWhiteSpace(segment.ZhText))
+            {
+                sb.AppendLine(segment.SourceText);
+            }
+            else
+            {
+                sb.AppendLine($"{segment.SourceText} {segment.ZhText}");
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    public static string ExportBilingualTable(IEnumerable<SubtitleSegment> segments)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("#\tStart\tEnd\tSource Text\tChinese Text");
+
+        foreach (var segment in segments)
+        {
+            sb.AppendLine($"{segment.Id}\t{segment.Start}\t{segment.End}\t{segment.SourceText}\t{segment.ZhText ?? ""}");
+        }
+
+        return sb.ToString();
+    }
+
+    public static string ExportSegments(IEnumerable<SubtitleSegment> segments, ExportFormat format, string styleName = "Default")
+    {
+        return format switch
+        {
+            ExportFormat.Srt => ExportSrt(segments),
+            ExportFormat.Vtt => ExportVtt(segments),
+            ExportFormat.Ass => ExportAss(segments, styleName),
+            ExportFormat.Txt => ExportTxt(segments),
+            ExportFormat.Bilingual => ExportBilingualTable(segments),
+            _ => ExportSrt(segments)
+        };
+    }
+
     private static string FormatAssTime(TimeSpan value)
     {
         return value.ToString("h\\:mm\\:ss\\.ff", CultureInfo.InvariantCulture);
@@ -52,5 +122,10 @@ public static class SubtitleExporter
     private static string EscapeAss(string value)
     {
         return value.Replace("\\", "\\\\").Replace("{", "\\{").Replace("}", "\\}");
+    }
+
+    private static string FormatVttTime(TimeSpan value)
+    {
+        return value.ToString("hh\\:mm\\:ss\\.fff", CultureInfo.InvariantCulture);
     }
 }
