@@ -25,6 +25,8 @@ public class EditingViewModel : ObservableObject
         NudgeBackwardCommand = new RelayCommand(NudgeBackward);
         NudgeForwardCommand = new RelayCommand(NudgeForward);
         SaveCommand = new RelayCommand(Save, CanSave);
+        ReTranslateSelectedCommand = new RelayCommand(ReTranslateSelected, CanReTranslateSelected);
+        ReTranslateAllCommand = new RelayCommand(ReTranslateAll, CanReTranslateAll);
 
         // Initialize auto-save service with a common auto-save directory
         var autoSaveDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GenSubtitle", "AutoSave");
@@ -65,6 +67,8 @@ public class EditingViewModel : ObservableObject
     public RelayCommand NudgeBackwardCommand { get; }
     public RelayCommand NudgeForwardCommand { get; }
     public RelayCommand SaveCommand { get; }
+    public RelayCommand ReTranslateSelectedCommand { get; }
+    public RelayCommand ReTranslateAllCommand { get; }
 
     public event EventHandler<string>? LoadVideoRequested;
     public event EventHandler? PlayPauseRequested;
@@ -139,5 +143,38 @@ public class EditingViewModel : ObservableObject
             return _autoSaveService.LoadAutoSave(SelectedTask);
         }
         return null;
+    }
+
+    private bool CanReTranslateSelected()
+    {
+        return SelectedTask?.SelectedSegment is not null;
+    }
+
+    private async void ReTranslateSelected()
+    {
+        if (SelectedTask?.SelectedSegment is null) return;
+
+        // TODO: Implement re-translation for selected segment
+        // In a full implementation, this would:
+        // 1. Call translation service for the selected segment
+        // 2. Update the segment's ZhText
+        // 3. Save to translation memory
+    }
+
+    private bool CanReTranslateAll()
+    {
+        return SelectedTask != null;
+    }
+
+    private async void ReTranslateAll()
+    {
+        if (SelectedTask == null) return;
+
+        // TODO: Implement re-translation for all segments
+        // In a full implementation, this would:
+        // 1. Call translation service for all segments
+        // 2. Update each segment's ZhText
+        // 3. Show progress dialog
+        // 4. Save translation memory
     }
 }
