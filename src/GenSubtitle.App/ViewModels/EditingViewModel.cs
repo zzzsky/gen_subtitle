@@ -27,6 +27,7 @@ public class EditingViewModel : ObservableObject
         SaveCommand = new RelayCommand(Save, CanSave);
         ReTranslateSelectedCommand = new RelayCommand(ReTranslateSelected, CanReTranslateSelected);
         ReTranslateAllCommand = new RelayCommand(ReTranslateAll, CanReTranslateAll);
+        OpenStyleEditorCommand = new RelayCommand(OpenStyleEditor);
 
         // Initialize auto-save service with a common auto-save directory
         var autoSaveDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GenSubtitle", "AutoSave");
@@ -69,6 +70,7 @@ public class EditingViewModel : ObservableObject
     public RelayCommand SaveCommand { get; }
     public RelayCommand ReTranslateSelectedCommand { get; }
     public RelayCommand ReTranslateAllCommand { get; }
+    public RelayCommand OpenStyleEditorCommand { get; }
 
     public event EventHandler<string>? LoadVideoRequested;
     public event EventHandler? PlayPauseRequested;
@@ -176,5 +178,16 @@ public class EditingViewModel : ObservableObject
         // 2. Update each segment's ZhText
         // 3. Show progress dialog
         // 4. Save translation memory
+    }
+
+    private void OpenStyleEditor()
+    {
+        // TODO: Show StyleEditorWindow
+        // For now, this is a placeholder
+        // In a full implementation, this would:
+        // 1. Create and show StyleEditorWindow
+        // 2. Get the style settings from user
+        // 3. Apply the style to subtitles (for ASS format)
+        // 4. Save style preferences
     }
 }

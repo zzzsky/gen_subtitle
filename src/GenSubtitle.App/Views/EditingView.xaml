@@ -34,7 +34,7 @@
             <Button Content="暂停" Style="{StaticResource MaterialDesignRaisedButton}" Width="80" Margin="0,0,8,0" Click="OnPause"/>
             <Button Content="对齐开始" Style="{StaticResource MaterialDesignOutlinedButton}" Width="90" Margin="0,0,8,0" Click="OnAlignStart"/>
             <Button Content="对齐结束" Style="{StaticResource MaterialDesignOutlinedButton}" Width="90" Margin="0,0,8,0" Click="OnAlignEnd"/>
-            <Button Content="重译选中" Command="{Binding ReTranslateSelectedCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" Width="90" Margin="8,0,0,0"/>
+            <Button Content="样式编辑" Command="{Binding OpenStyleEditorCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" Width="90" Margin="8,0,0,0"/>
             <Button Content="返回列表" Command="{Binding ReturnToProcessingCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" Width="90" Margin="8,0,0,0"/>
         </StackPanel>
 
