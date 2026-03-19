@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Windows.Input;
 using GenSubtitle.App.Services;
+using GenSubtitle.Core.Models;
 
 namespace GenSubtitle.App.ViewModels;
 
@@ -10,6 +12,7 @@ namespace GenSubtitle.App.ViewModels;
 public class EditingViewModel : ObservableObject
 {
     private readonly ITaskQueueService _taskQueue;
+    private readonly AutoSaveService _autoSaveService;
     private string? _currentVideoPath;
 
     public EditingViewModel(ITaskQueueService taskQueue)
@@ -23,8 +26,24 @@ public class EditingViewModel : ObservableObject
         NudgeForwardCommand = new RelayCommand(NudgeForward);
         SaveCommand = new RelayCommand(Save, CanSave);
 
+        // Initialize auto-save service with a common auto-save directory
+        var autoSaveDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GenSubtitle", "AutoSave");
+        _autoSaveService = new AutoSaveService(autoSaveDir);
+
         // Subscribe to task changes
         _taskQueue.Tasks.CollectionChanged += (s, e) => OnTaskCollectionChanged();
+
+        // Subscribe to property changes for auto-save
+        if (SelectedTask != null)
+        {
+            SelectedTask.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(TaskItemViewModel.Segments))
+                {
+                    RequestAutoSave();
+                }
+            };
+        }
 
         // Load initial video if task exists
         if (_taskQueue.SelectedTask is not null)
@@ -94,8 +113,31 @@ public class EditingViewModel : ObservableObject
 
     private void Save()
     {
-        // TODO: Implement save functionality
-        // For now, this is a placeholder for the save command
-        // In a full implementation, this would save the current subtitle edits
+        // Manual save - clear auto-save after saving
+        if (SelectedTask != null)
+        {
+            _autoSaveService.ClearAutoSave(SelectedTask);
+            // TODO: Implement actual save to SRT file
+        }
+    }
+
+    private void RequestAutoSave()
+    {
+        if (SelectedTask != null)
+        {
+            _autoSaveService.RequestAutoSave(SelectedTask);
+        }
+    }
+
+    /// <summary>
+    /// Check for auto-saved data and load if available
+    /// </summary>
+    public AutoSaveData? CheckAutoSave()
+    {
+        if (SelectedTask != null)
+        {
+            return _autoSaveService.LoadAutoSave(SelectedTask);
+        }
+        return null;
     }
 }
